@@ -55,30 +55,15 @@ public class Board {
     /* Initialize with random number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_random_num_furgos(int seed) {
         Random generator = new Random(seed);
-        int nfurgos = generator.nextInt(max_furgos); // 0<=num_furgos<max_furgos
-        int nest = map.size();
-        moves = new int[nfurgos][5]; 
-        for (int i = 0; i < nfurgos; ++i) {
-            moves[i][DEPARTURE] = generator.nextInt(nest);
-
-            do {
-                moves[i][FIRST_DROPOFF] = generator.nextInt(nest);
-            } while (moves[i][DEPARTURE] == moves[i][FIRST_DROPOFF]);
-
-            do {
-                moves[i][SECOND_DROPOFF] = generator.nextInt(nest);
-            } while (moves[i][DEPARTURE] == moves[i][SECOND_DROPOFF] || moves[i][FIRST_DROPOFF] == moves[i][SECOND_DROPOFF]);
-
-            int num_available_bikes = map.get(moves[i][DEPARTURE]).getNumBicicletasNoUsadas();
-            if (num_available_bikes > 30) moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
-            else moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
-            
-            moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
-        }
+        int nfurgos = generator.nextInt(max_furgos)+1; // 1<num_furgos<=max_furgos
+        moves = new int[nfurgos][5];
+        random_init(generator.nextInt());
     }
 
+    /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_max_num_furgos(int seed) {
-
+        moves = new int[max_furgos][5]; 
+        random_init(seed);
     }
 
     /* Operators */
@@ -105,4 +90,27 @@ public class Board {
     /* Heuristic function */
 
     /* Auxiliary */
+
+    /* Randomize routes (each path visits 3 DIFFERENT stations) */
+    private void random_init(int seed) {
+        Random generator = new Random(seed);
+        int nest = map.size();
+        for (int i = 0; i < moves.length; ++i) {
+            moves[i][DEPARTURE] = generator.nextInt(nest);
+
+            do {
+                moves[i][FIRST_DROPOFF] = generator.nextInt(nest);
+            } while (moves[i][DEPARTURE] == moves[i][FIRST_DROPOFF]);
+
+            do {
+                moves[i][SECOND_DROPOFF] = generator.nextInt(nest);
+            } while (moves[i][DEPARTURE] == moves[i][SECOND_DROPOFF] || moves[i][FIRST_DROPOFF] == moves[i][SECOND_DROPOFF]);
+
+            int num_available_bikes = map.get(moves[i][DEPARTURE]).getNumBicicletasNoUsadas();
+            if (num_available_bikes > 30) moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
+            else moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
+            
+            moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+        }
+    }
 }
