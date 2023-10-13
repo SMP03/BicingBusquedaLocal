@@ -2,7 +2,7 @@ package IABicing.BicingBusquedaLocal;
 
 import java.util.Random;
 
-import IA.Bicing.Estaciones;
+import IA.Bicing.Estaciones; 
 
 public class Board {
     /* Class independent from AIMA classes
@@ -68,7 +68,7 @@ public class Board {
 
     /* Operators */
     public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-
+        
     }
 
     public void remove_furgo(int furgo_id) {
