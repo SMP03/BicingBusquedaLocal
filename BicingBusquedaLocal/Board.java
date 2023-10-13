@@ -87,8 +87,29 @@ public class Board {
 
     }
 
-    /* Heuristic function */
+    /* Heuristic functions */
 
+    /* First criterion heuristic:
+     * -Optimize only the number of bikes (not taking into account the transport costs)
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * More info: page 5
+    */
+    public double first_criterion_heuristic() {
+
+    }
+
+    /* Both criteria heuristic:
+     * -Optimize the number of bikes and transport costs
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * Loss of ((number_of_bikes + 9) div 10)€ for each kilometer of trasport done with a furgo
+     * More info: page 5
+    */
+    public double both_criteria_heuristic() {
+
+    }
+    
     /* Auxiliary */
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
