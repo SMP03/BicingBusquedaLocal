@@ -96,7 +96,7 @@ public class Board {
      * More info: page 5
     */
     public double first_criterion_heuristic() {
-
+        return 0.0;
     }
 
     /* Both criteria heuristic:
@@ -107,7 +107,7 @@ public class Board {
      * More info: page 5
     */
     public double both_criteria_heuristic() {
-
+        return 0.0;
     }
     
     /* Auxiliary */
