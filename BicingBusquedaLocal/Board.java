@@ -70,7 +70,7 @@ public class Board {
 
     //Adds a new fugo to the map 
     public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-        if(moves.length < max_furgos) {
+        if(moves.length < max_furgos && departure != first_dropoff && bikes_taken <= 30) {
             int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
             add_row_moves(new_furgo);
         }
