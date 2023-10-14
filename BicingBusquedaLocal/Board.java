@@ -77,7 +77,7 @@ public class Board {
     }
 
     public void remove_furgo(int furgo_id) {
-        
+        remove_row_moves(furgo_id);
     }
 
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
@@ -105,6 +105,23 @@ public class Board {
             }
         }
         new_moves[moves.length] = row;
+        moves = new_moves;
+    }
+
+    private void remove_row_moves(int row_id) {
+        int[][] new_moves = new int[moves.length-1][5];
+        for(int i = 0; i < row_id; ++i) {
+            for(int j = 0; j < moves[0].length; ++j) {
+                new_moves[i][j] = moves[i][j];
+            }
+        }
+
+        for(int i = row_id + 1; i < moves.length; ++i) {
+            for(int j = 0; j < moves[0].length; ++j) {
+                new_moves[i-1][j] = moves[i][j];
+            }
+        } 
+
         moves = new_moves;
     }
 
