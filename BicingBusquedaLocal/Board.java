@@ -91,7 +91,8 @@ public class Board {
     }
 
     public void change_second_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
-
+        moves[furgo_id][SECOND_DROPOFF] = new_dropoff;
+        moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
     }
 
     /* Heuristic function */
