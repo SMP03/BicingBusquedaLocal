@@ -6,10 +6,10 @@ package IA.BicingBusquedaLocal;
 
 import aima.search.framework.HeuristicFunction;
 
-public class HeuristicFunction implements HeuristicFunction {
+public class BicingHeuristicFunction implements HeuristicFunction {
 
     public double getHeuristicValue(Object n){
 
-        return ((ProbIA5Board) n).heuristic();
+        return ((BicingBoard) n).heuristic();
     }
 }

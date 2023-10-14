@@ -12,7 +12,7 @@ public class SuccesorFunction implements SuccessorFunction{
 
     public List getSuccessors(Object state){
         ArrayList retval = new ArrayList();
-        ProbIA5Board board = (ProbIA5Board) state;
+        Board board = (Board) state;
 
         // Some code here
         // (flip all the consecutive pairs of coins and generate new states
