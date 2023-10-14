@@ -4,7 +4,7 @@ import java.util.Random;
 
 import IA.Bicing.Estaciones; 
 
-public class Board {
+public class BicingBoard {
     /* Class independent from AIMA classes
        - It has to implement the state of the problem and its operators
     */
@@ -33,7 +33,7 @@ public class Board {
 
 
     /* Constructor */
-    public Board(int num_furgos, int nest, int nbic, int dem, int map_seed, int init_strategy, int init_seed) {
+    public BicingBoard(int num_furgos, int nest, int nbic, int dem, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(nest, nbic, dem, map_seed);
         max_furgos = num_furgos;
         switch (init_strategy) {

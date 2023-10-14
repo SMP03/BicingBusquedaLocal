@@ -1,7 +1,7 @@
-import IA.BicingBusquedaLocal.Board;
-import IA.BicingBusquedaLocal.GoalTest;
-import IA.BicingBusquedaLocal.HeuristicFunction;
-import IA.BicingBusquedaLocal.SuccesorFunction;
+import IA.BicingBusquedaLocal.BicingBoard;
+import IA.BicingBusquedaLocal.BicingGoalTest;
+import IA.BicingBusquedaLocal.BicingHeuristicFunction;
+import IA.BicingBusquedaLocal.BicingSuccesorFunction;
 import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
@@ -22,13 +22,13 @@ public class Main {
         int [] prob = new int []{1 ,0, 1, 1, 0};
         int [] sol = new int[]{1, 1, 0, 1, 0};
 
-        ProbIA5Board board = new ProbIA5Board(prob, sol );
+        BicingBoard board = new BicingBoard(prob, sol );
 
         // Create the Problem object
         Problem p = new  Problem(board,
-                                new SuccesorFunction(),
-                                new GoalTest(),
-                                new HeuristicFunction());
+                                new BicingSuccesorFunction(),
+                                new BicingGoalTest(),
+                                new BicingHeuristicFunction());
 
         // Instantiate the search algorithm
 	// AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()

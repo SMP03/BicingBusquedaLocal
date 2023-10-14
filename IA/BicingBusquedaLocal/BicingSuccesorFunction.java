@@ -8,11 +8,11 @@ import java.util.List;
 /**
  * Created by bejar on 17/01/17
  */
-public class SuccesorFunction implements SuccessorFunction{
+public class BicingSuccesorFunction implements SuccessorFunction{
 
     public List getSuccessors(Object state){
         ArrayList retval = new ArrayList();
-        Board board = (Board) state;
+        BicingBoard board = (BicingBoard) state;
 
         // Some code here
         // (flip all the consecutive pairs of coins and generate new states
