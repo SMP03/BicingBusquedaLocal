@@ -10,8 +10,8 @@ import java.util.List;
  */
 public class BicingSuccesorFunction implements SuccessorFunction{
 
-    public List<BicingBoard> getSuccessors(Object state){
-        ArrayList<BicingBoard> retval = new ArrayList<BicingBoard>();
+    public List getSuccessors(Object state){
+        ArrayList retval = new ArrayList();
         BicingBoard board = (BicingBoard) state;
 
         int max_furgo_id = board.get_n_furgos();
@@ -25,7 +25,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 for (int bicis = 1; bicis <= Math.min((30), bicis_no_usades); ++bicis) {
                     BicingBoard successor = new BicingBoard(moves);
                     successor.add_furgo(departure, first_drop, bicis);
-                    retval.add(successor);
+                    String S=new String(BicingBoard.ADD_FURGO);
+                    retval.add(new Successor(S,successor));
                 }
             }
         }
@@ -34,7 +35,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         for(int id = 0; id < max_furgo_id; ++id) {
             BicingBoard successor = new BicingBoard(moves);
             successor.remove_furgo(id);
-            retval.add(successor);
+            String S=new String(BicingBoard.REMOVE_FURGO);
+            retval.add(new Successor(S,successor));
         }
 
         
