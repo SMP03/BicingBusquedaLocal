@@ -10,14 +10,25 @@ import java.util.List;
  */
 public class BicingSuccesorFunction implements SuccessorFunction{
 
-    public List getSuccessors(Object state){
-        ArrayList retval = new ArrayList();
+    public List<BicingBoard> getSuccessors(Object state){
+        ArrayList<BicingBoard> retval = new ArrayList<BicingBoard>();
         BicingBoard board = (BicingBoard) state;
 
-        // Some code here
-        // (flip all the consecutive pairs of coins and generate new states
-        // Add the states to retval as Succesor("flip i j", new_state)
-        // new_state has to be a copy of state
+        int max_furgo_id = board.get_n_furgos();
+        int[][] moves = board.get_moves();
+
+        //add_furgo(int departure, int first_dropoff, int bikes_taken)
+        
+
+        //remove_furgo
+        for(int id = 0; id < max_furgo_id; ++id) {
+            BicingBoard successor = new BicingBoard(moves);
+            successor.remove_furgo(id);
+            retval.add(successor);
+        }
+
+        
+
 
         return retval;
 

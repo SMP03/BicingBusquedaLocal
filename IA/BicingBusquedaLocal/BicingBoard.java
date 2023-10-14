@@ -33,8 +33,16 @@ public class BicingBoard {
 
 
     /* Constructor */
-    public BicingBoard(int num_furgos, int nest, int nbic, int dem, int map_seed, int init_strategy, int init_seed) {
-        map = new Estaciones(nest, nbic, dem, map_seed);
+    public BicingBoard(int[][] moves) {
+        for(int i = 0; i < moves.length; ++i) {
+            for(int j = 0; j < 5; ++j) {
+                this.moves[i][j] = moves[i][j];
+            }
+        }
+    }
+
+    public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
+        map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
         max_furgos = num_furgos;
         switch (init_strategy) {
             case RANDOM_NUM_FURGOS:
@@ -70,7 +78,7 @@ public class BicingBoard {
 
     //Adds a new fugo to the map 
     public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-        if(moves.length < max_furgos && departure != first_dropoff && bikes_taken <= 30) {
+        if(moves.length < max_furgos && departure != first_dropoff && bikes_taken <= 30 && is_free_departure(departure)) {
             int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
             add_row_moves(new_furgo);
         }
@@ -107,7 +115,25 @@ public class BicingBoard {
         return false;
     }
 
+    /* Getters */
+    public int get_n_furgos() {
+        return moves.length;
+    }
+
+    public int[][] get_moves() {
+        return moves;
+    }
+
     /* Auxiliary */
+
+    //Checks if there is no furgo starting at departure
+    private boolean is_free_departure(int departure) {
+        for(int i = 0; i < moves.length; ++i) 
+            if(moves[i][DEPARTURE] == departure) return false;
+        
+
+        return true;
+    }
 
     //Adds a row to the moves 
     private void add_row_moves(int[] row) {
@@ -141,16 +167,16 @@ public class BicingBoard {
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
     private void random_init(int seed) {
         Random generator = new Random(seed);
-        int nest = map.size();
+        int n_stations = map.size();
         for (int i = 0; i < moves.length; ++i) {
-            moves[i][DEPARTURE] = generator.nextInt(nest);
+            moves[i][DEPARTURE] = generator.nextInt(n_stations);
 
             do {
-                moves[i][FIRST_DROPOFF] = generator.nextInt(nest);
+                moves[i][FIRST_DROPOFF] = generator.nextInt(n_stations);
             } while (moves[i][DEPARTURE] == moves[i][FIRST_DROPOFF]);
 
             do {
-                moves[i][SECOND_DROPOFF] = generator.nextInt(nest);
+                moves[i][SECOND_DROPOFF] = generator.nextInt(n_stations);
             } while (moves[i][DEPARTURE] == moves[i][SECOND_DROPOFF] || moves[i][FIRST_DROPOFF] == moves[i][SECOND_DROPOFF]);
 
             int num_available_bikes = map.get(moves[i][DEPARTURE]).getNumBicicletasNoUsadas();
