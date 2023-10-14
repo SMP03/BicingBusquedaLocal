@@ -68,10 +68,10 @@ public class Board {
 
     /* Operators */
 
-    //Adds a new fugo to the map
+    //Adds a new fugo to the map 
     public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
         if(moves.length < max_furgos) {
-            int[] new_furgo = {departure, first_dropoff, bikes_taken, -1, 0};
+            int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
             add_row_moves(new_furgo);
         }
     }
@@ -95,9 +95,17 @@ public class Board {
     /* Heuristic function */
 
     /* Auxiliary */
+
+    //Adds a row to the moves 
     private void add_row_moves(int[] row) {
         int[][] new_moves = new int[moves.length + 1][5];
-        for(int i = 0; )
+        for(int i = 0; i < moves.length; ++i) {
+            for(int j = 0; j < moves[0].length; ++j) {
+                new_moves[i][j] = moves[i][j];
+            }
+        }
+        new_moves[moves.length] = row;
+        moves = new_moves;
     }
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
