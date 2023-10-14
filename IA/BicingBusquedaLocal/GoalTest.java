@@ -1,11 +1,11 @@
-package IA.ProbIA5;
+package IA.BicingBusquedaLocal;
 
 import aima.search.framework.GoalTest;
 
 /**
  * Created by bejar on 17/01/17.
  */
-public class ProbIA5GoalTest implements GoalTest {
+public class GoalTest implements GoalTest {
 
     public boolean isGoalState(Object state){
 

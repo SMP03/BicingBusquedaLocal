@@ -1,7 +1,7 @@
-import IA.ProbIA5.ProbIA5Board;
-import IA.ProbIA5.ProbIA5GoalTest;
-import IA.ProbIA5.ProbIA5HeuristicFunction;
-import IA.ProbIA5.ProbIA5SuccesorFunction;
+import IA.BicingBusquedaLocal.Board;
+import IA.BicingBusquedaLocal.GoalTest;
+import IA.BicingBusquedaLocal.HeuristicFunction;
+import IA.BicingBusquedaLocal.SuccesorFunction;
 import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
@@ -26,9 +26,9 @@ public class Main {
 
         // Create the Problem object
         Problem p = new  Problem(board,
-                                new ProbIA5SuccesorFunction(),
-                                new ProbIA5GoalTest(),
-                                new ProbIA5HeuristicFunction());
+                                new SuccesorFunction(),
+                                new GoalTest(),
+                                new HeuristicFunction());
 
         // Instantiate the search algorithm
 	// AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()
