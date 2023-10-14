@@ -47,6 +47,20 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             retval.add(new Successor(S,successor));
         }
 
+
+        //change_departure
+        for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
+            for (int station_id = 0; station_id < num_estacions; ++station_id) {
+                if (board.is_free_departure(station_id)) {
+                    for (int num_bikes = 0; num_bikes <= 30; ++num_bikes) {
+                        BicingBoard successor = new BicingBoard(moves);
+                        successor.change_departure(furgo_id, station_id, num_bikes);
+                        retval.add(successor);
+                    }
+                }
+            }
+        }
+
         
 
 
