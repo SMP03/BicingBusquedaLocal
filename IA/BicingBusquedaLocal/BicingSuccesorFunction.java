@@ -19,14 +19,22 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         int num_estacions = board.get_num_estacions();
 
         //add_furgo(int departure, int first_dropoff, int bikes_taken)
-        for (int departure = 0; departure < num_estacions; ++departure) {
-            int bicis_no_usades = board.get_bicis_no_usades(departure);
-            for (int first_drop = 0; first_drop < num_estacions; ++first_drop) {
-                for (int bicis = 1; bicis <= Math.min((30), bicis_no_usades); ++bicis) {
-                    BicingBoard successor = new BicingBoard(moves);
-                    successor.add_furgo(departure, first_drop, bicis);
-                    String S=new String(BicingBoard.ADD_FURGO);
-                    retval.add(new Successor(S,successor));
+        if (moves.length < max_furgo_id) {
+
+            for (int departure = 0; departure < num_estacions; ++departure) {
+                if (board.is_free_departure(departure)) {
+                    int bicis_no_usades = board.get_bicis_no_usades(departure);
+                    for (int first_drop = 0; first_drop < num_estacions; ++first_drop) {
+                        if (departure != first_drop) {
+                            for (int bicis = 1; bicis <= Math.min((30), bicis_no_usades); ++bicis) {
+
+                                BicingBoard successor = new BicingBoard(moves);
+                                successor.add_furgo(departure, first_drop, bicis);
+                                String S=new String(BicingBoard.ADD_FURGO);
+                                retval.add(new Successor(S,successor));
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -87,10 +87,10 @@ public class BicingBoard {
 
     //Adds a new fugo to the map 
     public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-        if(moves.length < max_furgos && departure != first_dropoff && bikes_taken <= 30 && is_free_departure(departure)) {
-            int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
-            add_row_moves(new_furgo);
-        }
+        
+        int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
+        add_row_moves(new_furgo);
+
     }
 
     public void remove_furgo(int furgo_id) {
@@ -144,7 +144,7 @@ public class BicingBoard {
     /* Auxiliary */
 
     //Checks if there is no furgo starting at departure
-    private boolean is_free_departure(int departure) {
+    public boolean is_free_departure(int departure) {
         for(int i = 0; i < moves.length; ++i) 
             if(moves[i][DEPARTURE] == departure) return false;
         
