@@ -140,6 +140,22 @@ public class BicingBoard {
     public int get_bicis_no_usades(int id_estacio) {
         return map.get(moves[id_estacio][DEPARTURE]).getNumBicicletasNoUsadas();
     }
+    
+    public int get_bikes_taken(int furgo_id) {
+        return moves[furgo_id][BIKES_TAKEN];
+    }
+
+    public int get_first_dropoff(int furgo_id) {
+        return moves[furgo_id][FIRST_DROPOFF];
+    }
+
+    public int get_bikes_second_dropoff(int furgo_id) {
+        return moves[furgo_id][BIKES_TAKEN] - moves[furgo_id][BIKES_DROPPED];
+    }
+
+    public int get_departure(int furgo_id) {
+        return moves[furgo_id][DEPARTURE];
+    }
 
     /* Auxiliary */
 

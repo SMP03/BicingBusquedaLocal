@@ -61,6 +61,33 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             }
         }
 
+        //change_first_dropoff
+        for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
+            int bikes_taken = board.get_bikes_taken(furgo_id);
+            for (int station_id = 0; station_id < num_estacions; ++station_id) {
+                if (board.get_departure(furgo_id) != station_id) {
+                    for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
+                        BicingBoard successor = new BicingBoard(moves);
+                        successor.change_first_dropoff(furgo_id, station_id, bikes_dropped);
+                        retval.add(successor);
+                    }
+                }
+            }
+        }
+
+        //change_second_dropoff
+        for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
+            int bikes_left = board.get_bikes_second_dropoff(furgo_id);
+            for (int station_id = 0; station_id < num_estacions; ++station_id) {
+                if (board.get_departure(furgo_id) != station_id && board.get_first_dropoff(furgo_id) != station_id) {
+                    for (int bikes_dropped = 0; bikes_dropped <= bikes_left; ++bikes_dropped) {
+                        BicingBoard successor = new BicingBoard(moves);
+                        successor.change_second_dropoff(furgo_id, station_id, bikes_dropped);
+                        retval.add(successor);
+                    }
+                }
+            }
+        }
         
 
 
