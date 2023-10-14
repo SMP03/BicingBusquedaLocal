@@ -81,7 +81,8 @@ public class Board {
     }
 
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
-
+        moves[furgo_id][DEPARTURE] = new_departure;
+        moves[furgo_id][BIKES_TAKEN] = bikes_taken;
     }
 
     public void change_first_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
