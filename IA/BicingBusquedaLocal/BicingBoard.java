@@ -23,6 +23,15 @@ public class BicingBoard {
     private static final int BIKES_TAKEN = 3;
     private static final int BIKES_DROPPED = 4;
 
+    /* String identifier for operators */
+
+    public static String ADD_FURGO = "AF";
+    public static String REMOVE_FURGO = "RF";
+    public static String CHANGE_DEPARTURE = "CD";
+    public static String CHANGE_FIRST_DROPOFF = "CFD";
+    public static String CHANGE_SECOND_DROPOFF = "CSD";
+
+
     /* Constants to enable use of different initial states algorithms */
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
@@ -122,6 +131,14 @@ public class BicingBoard {
 
     public int[][] get_moves() {
         return moves;
+    }
+
+    public int get_num_estacions() {
+        return map.size();
+    }
+
+    public int get_bicis_no_usades(int id_estacio) {
+        return map.get(moves[id_estacio][DEPARTURE]).getNumBicicletasNoUsadas();
     }
 
     /* Auxiliary */
