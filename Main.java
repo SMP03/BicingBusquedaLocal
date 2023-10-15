@@ -1,3 +1,4 @@
+import IA.Bicing.Estaciones;
 import IA.BicingBusquedaLocal.BicingBoard;
 import IA.BicingBusquedaLocal.BicingGoalTest;
 import IA.BicingBusquedaLocal.BicingHeuristicFunction;
@@ -22,7 +23,7 @@ public class Main {
         int [] prob = new int []{1 ,0, 1, 1, 0};
         int [] sol = new int[]{1, 1, 0, 1, 0};
 
-        BicingBoard board = new BicingBoard(prob, sol );
+        BicingBoard board = new BicingBoard(5, 25, 1250, Estaciones.EQUILIBRIUM, 0, BicingBoard.MAX_NUM_FURGOS, 1);
 
         // Create the Problem object
         Problem p = new  Problem(board,
