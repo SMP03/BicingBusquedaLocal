@@ -1,6 +1,7 @@
 package IA.BicingBusquedaLocal;
 
 import java.util.Random;
+import java.util.Arrays;
 
 import IA.Bicing.Estaciones; 
 
@@ -42,16 +43,16 @@ public class BicingBoard {
 
     /* Constructor */
     public BicingBoard(int[][] moves) {
-        for(int i = 0; i < moves.length; ++i) {
-            for(int j = 0; j < 5; ++j) {
-                this.moves[i][j] = moves[i][j];
-            }
-        }
+        this.moves = moves.clone();
     }
 
     /* Copy constructor (returns copy of the object) */
     public BicingBoard(BicingBoard original) {
         this.moves = original.moves.clone();
+    }
+
+    /* Empty constructor */
+    public BicingBoard() {
     }
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
@@ -89,16 +90,28 @@ public class BicingBoard {
 
     /* Operators */
 
-    //Adds a new fugo to the map 
-    public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-        
-        int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
-        add_row_moves(new_furgo);
-
+    /*Returns copy of object with a new furgo in the map*/ 
+    public BicingBoard add_furgo(int departure, int first_dropoff, int bikes_taken) {
+        BicingBoard new_board = new BicingBoard();
+        new_board.moves = Arrays.copyOf(moves, get_n_furgos()+1); // Crea una copia de l'array amb una posició extra
+        new_board.moves[new_board.get_n_furgos()-1][DEPARTURE] = departure;
+        new_board.moves[new_board.get_n_furgos()-1][FIRST_DROPOFF] = first_dropoff;
+        new_board.moves[new_board.get_n_furgos()-1][SECOND_DROPOFF] = -1;
+        new_board.moves[new_board.get_n_furgos()-1][BIKES_TAKEN] = bikes_taken;
+        new_board.moves[new_board.get_n_furgos()-1][BIKES_DROPPED] = bikes_taken;
+        return new_board;
     }
 
-    public void remove_furgo(int furgo_id) {
-        remove_row_moves(furgo_id);
+    /*Removes furgo at a specific id
+     * NOTE:Does not preserve the ids of the previous furgo (for faster implementation)
+    */
+    public BicingBoard remove_furgo(int furgo_id) {
+        BicingBoard new_board = new BicingBoard();
+        new_board.moves = Arrays.copyOf(moves, get_n_furgos()-1); // Crea una copia de l'array truncant l'última posició
+        if (furgo_id!=this.get_n_furgos()-1) {
+            new_board.moves[furgo_id] = this.moves[this.get_n_furgos()-1]; // Mou l'últim element a la posició esborrada
+        }
+        return new_board;
     }
 
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {

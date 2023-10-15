@@ -28,8 +28,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                         if (departure != first_drop) {
                             for (int bicis = 1; bicis <= Math.min((30), bicis_no_usades); ++bicis) {
 
-                                BicingBoard successor = new BicingBoard(moves);
-                                successor.add_furgo(departure, first_drop, bicis);
+                                BicingBoard successor = board.add_furgo(departure, first_drop, bicis);
                                 String S=new String(BicingBoard.ADD_FURGO);
                                 retval.add(new Successor(S,successor));
                             }
@@ -41,8 +40,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
 
         //remove_furgo
         for(int id = 0; id < max_furgo_id; ++id) {
-            BicingBoard successor = new BicingBoard(moves);
-            successor.remove_furgo(id);
+            BicingBoard successor = board.remove_furgo(id);
             String S=new String(BicingBoard.REMOVE_FURGO);
             retval.add(new Successor(S,successor));
         }
