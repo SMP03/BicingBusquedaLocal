@@ -2,8 +2,10 @@ package IA.BicingBusquedaLocal;
 
 import java.util.Random;
 import java.util.Arrays;
+import java.lang.Math;
 
-import IA.Bicing.Estaciones; 
+import IA.Bicing.Estaciones;
+import IA.Bicing.Estacion; 
 
 public class BicingBoard {
     /* Class independent from AIMA classes
@@ -129,10 +131,93 @@ public class BicingBoard {
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
     }
 
-    /* Heuristic function */
-    public double heuristic(){
-        // compute the number of coins out of place respect to solution
-        return 0;
+    /* Heuristic functions */
+    /* First criterion heuristic:
+     * -Optimize only the number of bikes (not taking into account the transport costs)
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * More info: page 5
+    */
+    public double first_criterion_heuristic() {
+        int[] balance = get_balance();
+
+        double ganancias = 0.0;
+        for (int i = 0; i < get_num_estacions(); ++i) {
+            Estacion est = map.get(i);
+            if (balance[i] > 0) {
+                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+            }
+            else if (balance[i] < 0) {
+                ganancias += balance[i];
+            }
+        }
+        return ganancias;
+    }
+
+    /* Both criteria heuristic:
+     * -Optimize the number of bikes and transport costs
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * Loss of ((number_of_bikes + 9) div 10)€ for each kilometer of trasport done with a furgo
+     * More info: page 5
+    */
+    public double both_criteria_heuristic() {
+        int[] balance = get_balance();
+
+        double ganancias = 0.0;
+        for (int i = 0; i < get_num_estacions(); ++i) {
+            Estacion est = map.get(i);
+            if (balance[i] > 0) {
+                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+            }
+            else if (balance[i] < 0) {
+                ganancias += balance[i];
+            }
+        }
+
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int bikes_taken = moves[i][BIKES_TAKEN];
+            int bikes_dropped = moves[i][BIKES_DROPPED];
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            Estacion departure_est = map.get(departure);
+            Estacion first_dropoff_est = map.get(first_dropoff);
+            ganancias -= manhattan_dist(departure_est, first_dropoff_est) * ((bikes_taken + 9) / 10);
+            if (second_dropoff != -1) {
+                Estacion second_dropoff_est = map.get(second_dropoff);
+                ganancias -= manhattan_dist(first_dropoff_est, second_dropoff_est) * ((bikes_taken - bikes_dropped + 9) / 10);
+            }
+        }
+
+        return ganancias;
+    }
+
+    private int[] get_balance() {
+        int[] balance = new int[get_num_estacions()]; // Initialized to 0 (guaranteed by lang spec)
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int bikes_taken = moves[i][BIKES_TAKEN];
+            int bikes_dropped = moves[i][BIKES_DROPPED];
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            balance[departure] -= bikes_taken;
+            if (second_dropoff != -1) {
+                balance[first_dropoff] += bikes_dropped;
+                balance[second_dropoff] += bikes_taken - bikes_dropped;
+            }
+            else {
+                balance[first_dropoff] += bikes_taken;
+            }
+        }
+
+        return balance;
+    }
+
+    private int manhattan_dist(Estacion e1, Estacion e2) {
+        return Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY());
     }
 
     /* Goal test */
