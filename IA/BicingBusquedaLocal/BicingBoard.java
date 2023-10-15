@@ -185,35 +185,6 @@ public class BicingBoard {
         return true;
     }
 
-    //Adds a row to the moves 
-    private void add_row_moves(int[] row) {
-        int[][] new_moves = new int[moves.length + 1][5];
-        for(int i = 0; i < moves.length; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i][j] = moves[i][j];
-            }
-        }
-        new_moves[moves.length] = row;
-        moves = new_moves;
-    }
-
-    private void remove_row_moves(int row_id) {
-        int[][] new_moves = new int[moves.length-1][5];
-        for(int i = 0; i < row_id; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i][j] = moves[i][j];
-            }
-        }
-
-        for(int i = row_id + 1; i < moves.length; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i-1][j] = moves[i][j];
-            }
-        } 
-
-        moves = new_moves;
-    }
-
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
     private void random_init(int seed) {
         Random generator = new Random(seed);
