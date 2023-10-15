@@ -40,7 +40,6 @@ public class BicingBoard {
     private static Estaciones map;
     private static int max_furgos;
 
-
     /* Constructor */
     public BicingBoard(int[][] moves) {
         for(int i = 0; i < moves.length; ++i) {
@@ -48,6 +47,11 @@ public class BicingBoard {
                 this.moves[i][j] = moves[i][j];
             }
         }
+    }
+
+    /* Copy constructor (returns copy of the object) */
+    public BicingBoard(BicingBoard original) {
+        this.moves = original.moves.clone();
     }
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
