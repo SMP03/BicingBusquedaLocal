@@ -40,24 +40,24 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         //remove_furgo
         for(int id = 0; id < max_furgo_id; ++id) {
             BicingBoard successor = board.remove_furgo(id);
-            String S=new String(BicingBoard.REMOVE_FURGO);
+            String S=new String(BicingBoard.REMOVE_FURGO + ":\tfid:" + id);
             retval.add(new Successor(S,successor));
         }
-
+        /*
         //change_departure
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
                 if (board.is_free_departure(station_id)) {
                     for (int num_bikes = 0; num_bikes <= 30; ++num_bikes) {
-                        BicingBoard successor = new BicingBoard(moves);
+                        BicingBoard successor = new BicingBoard(board);
                         successor.change_departure(furgo_id, station_id, num_bikes);
-                        String S = new String(BicingBoard.CHANGE_DEPARTURE);
+                        String S = new String(BicingBoard.CHANGE_DEPARTURE + ":\tdep:" + station_id + "\tbicis:" + num_bikes);
                         retval.add(new Successor(S,successor));
                     }
                 }
             }
         }
-
+        
         //change_first_dropoff
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
             int bikes_taken = board.get_bikes_taken(furgo_id);
@@ -66,7 +66,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                     for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
                         BicingBoard successor = new BicingBoard(moves);
                         successor.change_first_dropoff(furgo_id, station_id, bikes_dropped);
-                        String S = new String(BicingBoard.CHANGE_FIRST_DROPOFF);
+                        String S = new String(BicingBoard.CHANGE_FIRST_DROPOFF + ":\tfd:" + station_id + "\tbdrop:" + bikes_dropped);
                         retval.add(new Successor(S,successor));
                     }
                 }
@@ -81,23 +81,24 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                     for (int bikes_dropped = 0; bikes_dropped <= bikes_left; ++bikes_dropped) {
                         BicingBoard successor = new BicingBoard(moves);
                         successor.change_second_dropoff(furgo_id, station_id, bikes_dropped);
-                        String S = new String(BicingBoard.CHANGE_SECOND_DROPOFF);
+                        String S = new String(BicingBoard.CHANGE_SECOND_DROPOFF + ":\tsd:" + station_id + "\tbdrop:" + bikes_dropped);
                         retval.add(new Successor(S,successor));
                     }
                 }
             }
         }
-        
+        */
         double prev = board.first_criterion_heuristic();
         for (int i = 0; i < retval.size(); ++i) {
             Successor s = ((Successor)retval.get(i));
             String action = s.getAction();
             BicingBoard bstate = (BicingBoard)s.getState();
-            System.out.println(action + "\th:" + (prev - bstate.first_criterion_heuristic()));
+            System.out.println(action + "\th:" + (bstate.first_criterion_heuristic() - prev));
         }
         System.out.println("Num furgos prev:" + board.get_n_furgos());
         System.out.println("=================================");
         
+        System.out.println("Step, prev h:" + board.first_criterion_heuristic());
         return retval;
 
     }

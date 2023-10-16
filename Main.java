@@ -19,7 +19,7 @@ public class Main {
     private static final int NUM_BICYCLES = 1250;
     private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
     private static final int MAP_SEED = 0;
-    private static final int INIT_STRATEGY = BicingBoard.MAX_NUM_FURGOS;
+    private static final int INIT_STRATEGY = BicingBoard.EMPTY_FURGOS;
     private static final int INIT_SEED = 4;
 
     public static void main(String[] args) throws Exception{
