@@ -38,6 +38,7 @@ public class BicingBoard {
     /* Constants to enable use of different initial states algorithms */
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
+    public static final int EMPTY_FURGOS = 2;
 
     private int [][] moves;
     private static Estaciones map;
@@ -55,6 +56,7 @@ public class BicingBoard {
 
     /* Empty constructor */
     public BicingBoard() {
+        moves = new int[0][5];
     }
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
@@ -69,6 +71,10 @@ public class BicingBoard {
                 init_max_num_furgos(init_seed);
                 break;
             
+            case EMPTY_FURGOS:
+                empty_furgos();
+                break;
+
             default:
                 break;
         }
@@ -90,12 +96,18 @@ public class BicingBoard {
         random_init(seed);
     }
 
+    /* Initialize with no furgos */
+    private void empty_furgos() {
+        moves = new int[0][5]; 
+    }
+
     /* Operators */
 
     /*Returns copy of object with a new furgo in the map*/ 
     public BicingBoard add_furgo(int departure, int first_dropoff, int bikes_taken) {
         BicingBoard new_board = new BicingBoard();
         new_board.moves = Arrays.copyOf(moves, get_n_furgos()+1); // Crea una copia de l'array amb una posició extra
+        new_board.moves[new_board.get_n_furgos()-1] = new int[5];
         new_board.moves[new_board.get_n_furgos()-1][DEPARTURE] = departure;
         new_board.moves[new_board.get_n_furgos()-1][FIRST_DROPOFF] = first_dropoff;
         new_board.moves[new_board.get_n_furgos()-1][SECOND_DROPOFF] = -1;
@@ -240,7 +252,7 @@ public class BicingBoard {
     }
 
     public int get_bicis_no_usades(int id_estacio) {
-        return map.get(moves[id_estacio][DEPARTURE]).getNumBicicletasNoUsadas();
+        return map.get(id_estacio).getNumBicicletasNoUsadas();
     }
     
     public int get_bikes_taken(int furgo_id) {
@@ -257,6 +269,10 @@ public class BicingBoard {
 
     public int get_departure(int furgo_id) {
         return moves[furgo_id][DEPARTURE];
+    }
+
+    public static int get_max_furgos() {
+        return max_furgos;
     }
 
     /* Auxiliary */
@@ -286,10 +302,18 @@ public class BicingBoard {
             } while (moves[i][DEPARTURE] == moves[i][SECOND_DROPOFF] || moves[i][FIRST_DROPOFF] == moves[i][SECOND_DROPOFF]);
 
             int num_available_bikes = map.get(moves[i][DEPARTURE]).getNumBicicletasNoUsadas();
-            if (num_available_bikes > 30) moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
-            else moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
-            
-            moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            if (num_available_bikes > 30) {
+                moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
+                moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            }
+            else if (num_available_bikes > 1) {
+                moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
+                moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            }
+            else {
+                moves[i][BIKES_TAKEN] = 0;
+                moves[i][BIKES_DROPPED] = 0;
+            }
         }
     }
 }
