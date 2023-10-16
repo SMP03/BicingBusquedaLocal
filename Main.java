@@ -14,16 +14,16 @@ import java.util.List;
 import java.util.Properties;
 
 public class Main {
+    private static final int NUM_FURGOS = 5;
+    private static final int NUM_STATIONS = 25;
+    private static final int NUM_BICYCLES = 1250;
+    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
+    private static final int MAP_SEED = 0;
+    private static final int INIT_STRATEGY = BicingBoard.MAX_NUM_FURGOS;
+    private static final int INIT_SEED = 1;
 
     public static void main(String[] args) throws Exception{
-        /**
-         *  For a problem to be solvable:
-         *    count(0,prob) % 2 == count(0,sol) %2
-         */
-        int [] prob = new int []{1 ,0, 1, 1, 0};
-        int [] sol = new int[]{1, 1, 0, 1, 0};
-
-        BicingBoard board = new BicingBoard(5, 25, 1250, Estaciones.EQUILIBRIUM, 0, BicingBoard.MAX_NUM_FURGOS, 1);
+        BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, MAP_SEED, INIT_STRATEGY, INIT_SEED);
 
         // Create the Problem object
         Problem p = new  Problem(board,
