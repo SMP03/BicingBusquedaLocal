@@ -1,3 +1,4 @@
+import IA.Bicing.Estaciones;
 import IA.BicingBusquedaLocal.BicingBoard;
 import IA.BicingBusquedaLocal.BicingGoalTest;
 import IA.BicingBusquedaLocal.BicingHeuristicFunction;
@@ -6,23 +7,23 @@ import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
-import aima.search.informed.AStarSearch;
-import aima.search.informed.IterativeDeepeningAStarSearch;
+import aima.search.informed.HillClimbingSearch;
+import aima.search.informed.SimulatedAnnealingSearch;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 public class Main {
+    private static final int NUM_FURGOS = 5;
+    private static final int NUM_STATIONS = 25;
+    private static final int NUM_BICYCLES = 1250;
+    private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
+    private static final int MAP_SEED = 0;
+    private static final int INIT_STRATEGY = BicingBoard.EMPTY_FURGOS;
+    private static final int INIT_SEED = 4;
 
     public static void main(String[] args) throws Exception{
-        /**
-         *  For a problem to be solvable:
-         *    count(0,prob) % 2 == count(0,sol) %2
-         */
-        int [] prob = new int []{1 ,0, 1, 1, 0};
-        int [] sol = new int[]{1, 1, 0, 1, 0};
-
-        BicingBoard board = new BicingBoard(prob, sol );
+        BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, MAP_SEED, INIT_STRATEGY, INIT_SEED);
 
         // Create the Problem object
         Problem p = new  Problem(board,
@@ -31,11 +32,11 @@ public class Main {
                                 new BicingHeuristicFunction());
 
         // Instantiate the search algorithm
-	// AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()
-        Search alg = new AStarSearch(new GraphSearch());
+	// Hill Climbing Search
+        Search seach = new HillClimbingSearch();
 
         // Instantiate the SearchAgent object
-        SearchAgent agent = new SearchAgent(p, alg);
+        SearchAgent agent = new SearchAgent(p, seach);
 
 	// We print the results of the search
         System.out.println();

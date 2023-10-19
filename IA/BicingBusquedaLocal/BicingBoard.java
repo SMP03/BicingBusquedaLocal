@@ -1,8 +1,11 @@
 package IA.BicingBusquedaLocal;
 
 import java.util.Random;
+import java.util.Arrays;
+import java.lang.Math;
 
-import IA.Bicing.Estaciones; 
+import IA.Bicing.Estaciones;
+import IA.Bicing.Estacion; 
 
 public class BicingBoard {
     /* Class independent from AIMA classes
@@ -35,19 +38,25 @@ public class BicingBoard {
     /* Constants to enable use of different initial states algorithms */
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
+    public static final int EMPTY_FURGOS = 2;
 
     private int [][] moves;
     private static Estaciones map;
     private static int max_furgos;
 
-
     /* Constructor */
     public BicingBoard(int[][] moves) {
-        for(int i = 0; i < moves.length; ++i) {
-            for(int j = 0; j < 5; ++j) {
-                this.moves[i][j] = moves[i][j];
-            }
-        }
+        this.moves = moves.clone();
+    }
+
+    /* Copy constructor (returns copy of the object) */
+    public BicingBoard(BicingBoard original) {
+        this.moves = original.moves.clone();
+    }
+
+    /* Empty constructor */
+    public BicingBoard() {
+        moves = new int[0][5];
     }
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
@@ -62,6 +71,10 @@ public class BicingBoard {
                 init_max_num_furgos(init_seed);
                 break;
             
+            case EMPTY_FURGOS:
+                empty_furgos();
+                break;
+
             default:
                 break;
         }
@@ -83,18 +96,36 @@ public class BicingBoard {
         random_init(seed);
     }
 
-    /* Operators */
-
-    //Adds a new fugo to the map 
-    public void add_furgo(int departure, int first_dropoff, int bikes_taken) {
-        
-        int[] new_furgo = {departure, first_dropoff, -1, bikes_taken, bikes_taken};
-        add_row_moves(new_furgo);
-
+    /* Initialize with no furgos */
+    private void empty_furgos() {
+        moves = new int[0][5]; 
     }
 
-    public void remove_furgo(int furgo_id) {
-        remove_row_moves(furgo_id);
+    /* Operators */
+
+    /*Returns copy of object with a new furgo in the map*/ 
+    public BicingBoard add_furgo(int departure, int first_dropoff, int bikes_taken) {
+        BicingBoard new_board = new BicingBoard();
+        new_board.moves = Arrays.copyOf(moves, get_n_furgos()+1); // Crea una copia de l'array amb una posició extra
+        new_board.moves[new_board.get_n_furgos()-1] = new int[5];
+        new_board.moves[new_board.get_n_furgos()-1][DEPARTURE] = departure;
+        new_board.moves[new_board.get_n_furgos()-1][FIRST_DROPOFF] = first_dropoff;
+        new_board.moves[new_board.get_n_furgos()-1][SECOND_DROPOFF] = -1;
+        new_board.moves[new_board.get_n_furgos()-1][BIKES_TAKEN] = bikes_taken;
+        new_board.moves[new_board.get_n_furgos()-1][BIKES_DROPPED] = bikes_taken;
+        return new_board;
+    }
+
+    /*Removes furgo at a specific id
+     * NOTE:Does not preserve the ids of the previous furgo (for faster implementation)
+    */
+    public BicingBoard remove_furgo(int furgo_id) {
+        BicingBoard new_board = new BicingBoard();
+        new_board.moves = Arrays.copyOf(moves, get_n_furgos()-1); // Crea una copia de l'array truncant l'última posició
+        if (furgo_id!=this.get_n_furgos()-1) {
+            new_board.moves[furgo_id] = this.moves[this.get_n_furgos()-1]; // Mou l'últim element a la posició esborrada
+        }
+        return new_board;
     }
 
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
@@ -112,10 +143,93 @@ public class BicingBoard {
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
     }
 
-    /* Heuristic function */
-    public double heuristic(){
-        // compute the number of coins out of place respect to solution
-        return 0;
+    /* Heuristic functions */
+    /* First criterion heuristic:
+     * -Optimize only the number of bikes (not taking into account the transport costs)
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * More info: page 5
+    */
+    public double first_criterion_heuristic() {
+        int[] balance = get_balance();
+
+        double ganancias = 0.0;
+        for (int i = 0; i < get_num_estacions(); ++i) {
+            Estacion est = map.get(i);
+            if (balance[i] > 0) {
+                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+            }
+            else if (balance[i] < 0) {
+                ganancias += balance[i];
+            }
+        }
+        return ganancias;
+    }
+
+    /* Both criteria heuristic:
+     * -Optimize the number of bikes and transport costs
+     * +1€ for each moved bike that counts to getting closer to the demand
+     * -1€ for each moved bike that gets the station further away from the demand
+     * Loss of ((number_of_bikes + 9) div 10)€ for each kilometer of trasport done with a furgo
+     * More info: page 5
+    */
+    public double both_criteria_heuristic() {
+        int[] balance = get_balance();
+
+        double ganancias = 0.0;
+        for (int i = 0; i < get_num_estacions(); ++i) {
+            Estacion est = map.get(i);
+            if (balance[i] > 0) {
+                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+            }
+            else if (balance[i] < 0) {
+                ganancias += balance[i];
+            }
+        }
+
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int bikes_taken = moves[i][BIKES_TAKEN];
+            int bikes_dropped = moves[i][BIKES_DROPPED];
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            Estacion departure_est = map.get(departure);
+            Estacion first_dropoff_est = map.get(first_dropoff);
+            ganancias -= manhattan_dist(departure_est, first_dropoff_est) * ((bikes_taken + 9) / 10);
+            if (second_dropoff != -1) {
+                Estacion second_dropoff_est = map.get(second_dropoff);
+                ganancias -= manhattan_dist(first_dropoff_est, second_dropoff_est) * ((bikes_taken - bikes_dropped + 9) / 10);
+            }
+        }
+
+        return ganancias;
+    }
+
+    private int[] get_balance() {
+        int[] balance = new int[get_num_estacions()]; // Initialized to 0 (guaranteed by lang spec)
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int bikes_taken = moves[i][BIKES_TAKEN];
+            int bikes_dropped = moves[i][BIKES_DROPPED];
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            balance[departure] -= bikes_taken;
+            if (second_dropoff != -1) {
+                balance[first_dropoff] += bikes_dropped;
+                balance[second_dropoff] += bikes_taken - bikes_dropped;
+            }
+            else {
+                balance[first_dropoff] += bikes_taken;
+            }
+        }
+
+        return balance;
+    }
+
+    private int manhattan_dist(Estacion e1, Estacion e2) {
+        return Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY());
     }
 
     /* Goal test */
@@ -138,7 +252,7 @@ public class BicingBoard {
     }
 
     public int get_bicis_no_usades(int id_estacio) {
-        return map.get(moves[id_estacio][DEPARTURE]).getNumBicicletasNoUsadas();
+        return map.get(id_estacio).getNumBicicletasNoUsadas();
     }
     
     public int get_bikes_taken(int furgo_id) {
@@ -157,6 +271,10 @@ public class BicingBoard {
         return moves[furgo_id][DEPARTURE];
     }
 
+    public static int get_max_furgos() {
+        return max_furgos;
+    }
+
     /* Auxiliary */
 
     //Checks if there is no furgo starting at departure
@@ -166,35 +284,6 @@ public class BicingBoard {
         
 
         return true;
-    }
-
-    //Adds a row to the moves 
-    private void add_row_moves(int[] row) {
-        int[][] new_moves = new int[moves.length + 1][5];
-        for(int i = 0; i < moves.length; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i][j] = moves[i][j];
-            }
-        }
-        new_moves[moves.length] = row;
-        moves = new_moves;
-    }
-
-    private void remove_row_moves(int row_id) {
-        int[][] new_moves = new int[moves.length-1][5];
-        for(int i = 0; i < row_id; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i][j] = moves[i][j];
-            }
-        }
-
-        for(int i = row_id + 1; i < moves.length; ++i) {
-            for(int j = 0; j < moves[0].length; ++j) {
-                new_moves[i-1][j] = moves[i][j];
-            }
-        } 
-
-        moves = new_moves;
     }
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
@@ -213,10 +302,18 @@ public class BicingBoard {
             } while (moves[i][DEPARTURE] == moves[i][SECOND_DROPOFF] || moves[i][FIRST_DROPOFF] == moves[i][SECOND_DROPOFF]);
 
             int num_available_bikes = map.get(moves[i][DEPARTURE]).getNumBicicletasNoUsadas();
-            if (num_available_bikes > 30) moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
-            else moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
-            
-            moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            if (num_available_bikes > 30) {
+                moves[i][BIKES_TAKEN] = generator.nextInt(30) + 1;
+                moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            }
+            else if (num_available_bikes > 1) {
+                moves[i][BIKES_TAKEN] = generator.nextInt(num_available_bikes) + 1;
+                moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
+            }
+            else {
+                moves[i][BIKES_TAKEN] = 0;
+                moves[i][BIKES_DROPPED] = 0;
+            }
         }
     }
 }
