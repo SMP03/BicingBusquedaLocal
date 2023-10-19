@@ -160,7 +160,13 @@ public class BicingBoard {
                 ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
             }
             else if (balance[i] < 0) {
-                ganancias += balance[i];
+                if (est.getDemanda() >= est.getNumBicicletasNext()) {
+                    ganancias += balance[i];
+                }
+                else {
+                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
+                }
+                
             }
         }
         return ganancias;
@@ -183,7 +189,13 @@ public class BicingBoard {
                 ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
             }
             else if (balance[i] < 0) {
-                ganancias += balance[i];
+                if (est.getDemanda() >= est.getNumBicicletasNext()) {
+                    ganancias += balance[i];
+                }
+                else {
+                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
+                }
+                
             }
         }
 

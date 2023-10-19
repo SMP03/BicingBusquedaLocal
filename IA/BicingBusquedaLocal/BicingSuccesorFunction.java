@@ -43,12 +43,13 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             String S=new String(BicingBoard.REMOVE_FURGO + ":\tfid:" + id);
             retval.add(new Successor(S,successor));
         }
-        /*
+        
         //change_departure
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
                 if (board.is_free_departure(station_id)) {
-                    for (int num_bikes = 0; num_bikes <= 30; ++num_bikes) {
+                    int bicis_no_usades = board.get_bicis_no_usades(station_id);
+                    for (int num_bikes = 0; num_bikes <= Math.min((30), bicis_no_usades); ++num_bikes) {
                         BicingBoard successor = new BicingBoard(board);
                         successor.change_departure(furgo_id, station_id, num_bikes);
                         String S = new String(BicingBoard.CHANGE_DEPARTURE + ":\tdep:" + station_id + "\tbicis:" + num_bikes);
@@ -87,7 +88,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 }
             }
         }
-        */
+        
         double prev = board.first_criterion_heuristic();
         for (int i = 0; i < retval.size(); ++i) {
             Successor s = ((Successor)retval.get(i));
