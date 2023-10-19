@@ -17,7 +17,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         int max_furgo_id = board.get_n_furgos();
         int[][] moves = board.get_moves();
         int num_estacions = board.get_num_estacions();
-
+        /*
         //add_furgo(int departure, int first_dropoff, int bikes_taken)
         if (max_furgo_id < BicingBoard.get_max_furgos()) {
             for (int departure = 0; departure < num_estacions; ++departure) {
@@ -36,7 +36,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 }
             }
         }
-        
+        */
         //remove_furgo
         for(int id = 0; id < max_furgo_id; ++id) {
             BicingBoard successor = board.remove_furgo(id);
@@ -49,7 +49,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
                 if (board.is_free_departure(station_id)) {
                     int bicis_no_usades = board.get_bicis_no_usades(station_id);
-                    for (int num_bikes = 0; num_bikes <= Math.min((30), bicis_no_usades); ++num_bikes) {
+                    for (int num_bikes = 1; num_bikes <= Math.min((30), bicis_no_usades); ++num_bikes) {
                         BicingBoard successor = new BicingBoard(board);
                         successor.change_departure(furgo_id, station_id, num_bikes);
                         String S = new String(BicingBoard.CHANGE_DEPARTURE + ":\tdep:" + station_id + "\tbicis:" + num_bikes);
@@ -63,9 +63,9 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
             int bikes_taken = board.get_bikes_taken(furgo_id);
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
-                if (board.get_departure(furgo_id) != station_id) {
+                if (board.get_departure(furgo_id) != station_id && board.get_second_dropoff(furgo_id) != station_id) {
                     for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
-                        BicingBoard successor = new BicingBoard(moves);
+                        BicingBoard successor = new BicingBoard(board);
                         successor.change_first_dropoff(furgo_id, station_id, bikes_dropped);
                         String S = new String(BicingBoard.CHANGE_FIRST_DROPOFF + ":\tfd:" + station_id + "\tbdrop:" + bikes_dropped);
                         retval.add(new Successor(S,successor));
@@ -76,11 +76,11 @@ public class BicingSuccesorFunction implements SuccessorFunction{
 
         //change_second_dropoff
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
-            int bikes_left = board.get_bikes_second_dropoff(furgo_id);
+            int bikes_taken = board.get_bikes_taken(furgo_id);
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
                 if (board.get_departure(furgo_id) != station_id && board.get_first_dropoff(furgo_id) != station_id) {
-                    for (int bikes_dropped = 0; bikes_dropped <= bikes_left; ++bikes_dropped) {
-                        BicingBoard successor = new BicingBoard(moves);
+                    for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
+                        BicingBoard successor = new BicingBoard(board);
                         successor.change_second_dropoff(furgo_id, station_id, bikes_dropped);
                         String S = new String(BicingBoard.CHANGE_SECOND_DROPOFF + ":\tsd:" + station_id + "\tbdrop:" + bikes_dropped);
                         retval.add(new Successor(S,successor));
@@ -88,7 +88,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 }
             }
         }
-        
+        /*
         double prev = board.first_criterion_heuristic();
         for (int i = 0; i < retval.size(); ++i) {
             Successor s = ((Successor)retval.get(i));
@@ -98,7 +98,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         }
         System.out.println("Num furgos prev:" + board.get_n_furgos());
         System.out.println("=================================");
-        
+        */
         System.out.println("Step, prev h:" + board.first_criterion_heuristic());
         return retval;
 

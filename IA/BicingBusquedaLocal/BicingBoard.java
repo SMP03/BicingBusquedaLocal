@@ -46,12 +46,16 @@ public class BicingBoard {
 
     /* Constructor */
     public BicingBoard(int[][] moves) {
-        this.moves = moves.clone();
+        this.moves = new int[moves.length][];
+        for (int i = 0; i < moves.length; ++i)
+            this.moves[i] = moves[i].clone();
     }
 
     /* Copy constructor (returns copy of the object) */
     public BicingBoard(BicingBoard original) {
-        this.moves = original.moves.clone();
+        this.moves = new int[original.moves.length][];
+        for (int i = 0; i < original.moves.length; ++i)
+            this.moves[i] = original.moves[i].clone();
     }
 
     /* Empty constructor */
@@ -129,8 +133,8 @@ public class BicingBoard {
     }
 
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
-        moves[furgo_id][DEPARTURE] = new_departure;
-        moves[furgo_id][BIKES_TAKEN] = bikes_taken;
+        this.moves[furgo_id][DEPARTURE] = new_departure;
+        this.moves[furgo_id][BIKES_TAKEN] = bikes_taken;
     }
 
     public void change_first_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
@@ -273,6 +277,10 @@ public class BicingBoard {
 
     public int get_first_dropoff(int furgo_id) {
         return moves[furgo_id][FIRST_DROPOFF];
+    }
+
+    public int get_second_dropoff(int furgo_id) {
+        return moves[furgo_id][SECOND_DROPOFF];
     }
 
     public int get_bikes_second_dropoff(int furgo_id) {

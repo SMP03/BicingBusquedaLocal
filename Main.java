@@ -18,9 +18,9 @@ public class Main {
     private static final int NUM_STATIONS = 25;
     private static final int NUM_BICYCLES = 1250;
     private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
-    private static final int MAP_SEED = 0;
-    private static final int INIT_STRATEGY = BicingBoard.EMPTY_FURGOS;
-    private static final int INIT_SEED = 4;
+    private static final int MAP_SEED = (int)(Math.random()*Integer.MAX_VALUE);
+    private static final int INIT_STRATEGY = BicingBoard.MAX_NUM_FURGOS;
+    private static final int INIT_SEED = (int)(Math.random()*Integer.MAX_VALUE);
 
     public static void main(String[] args) throws Exception{
         BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, MAP_SEED, INIT_STRATEGY, INIT_SEED);
