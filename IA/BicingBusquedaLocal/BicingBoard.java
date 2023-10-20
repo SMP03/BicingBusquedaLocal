@@ -361,7 +361,7 @@ public class BicingBoard {
             do {
                 station_id = generator.nextInt(n_stations);
             }
-            while(is_free_departure(station_id));
+            while(!is_free_departure(station_id));
 
             moves[furgo_id][DEPARTURE] = station_id;
 
