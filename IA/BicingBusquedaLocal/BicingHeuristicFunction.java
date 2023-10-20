@@ -10,6 +10,6 @@ public class BicingHeuristicFunction implements HeuristicFunction {
 
     public double getHeuristicValue(Object n){
 
-        return -1 *((BicingBoard) n).first_criterion_heuristic();
+        return -1 *((BicingBoard) n).both_criteria_heuristic();
     }
 }
