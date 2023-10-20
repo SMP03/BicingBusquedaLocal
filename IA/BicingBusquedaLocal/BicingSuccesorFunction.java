@@ -9,6 +9,15 @@ import java.util.List;
  * Created by bejar on 17/01/17
  */
 public class BicingSuccesorFunction implements SuccessorFunction{
+    private boolean quiet;
+    
+    public BicingSuccesorFunction() {
+        quiet = false;
+    }
+
+    public BicingSuccesorFunction(Boolean quiet) {
+        this.quiet = quiet;
+    }
 
     public List getSuccessors(Object state){
         ArrayList retval = new ArrayList();
@@ -17,7 +26,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         int max_furgo_id = board.get_n_furgos();
         int[][] moves = board.get_moves();
         int num_estacions = board.get_num_estacions();
-        /*
+        
         //add_furgo(int departure, int first_dropoff, int bikes_taken)
         if (max_furgo_id < BicingBoard.get_max_furgos()) {
             for (int departure = 0; departure < num_estacions; ++departure) {
@@ -36,7 +45,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 }
             }
         }
-        */
+        
         //remove_furgo
         for(int id = 0; id < max_furgo_id; ++id) {
             BicingBoard successor = board.remove_furgo(id);
@@ -99,7 +108,17 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         System.out.println("Num furgos prev:" + board.get_n_furgos());
         System.out.println("=================================");
         */
-        System.out.println("Step, prev h:" + board.first_criterion_heuristic());
+        if (!quiet) {
+            int[] balance = board.get_balance();
+            double bike_income = board.get_bike_income(balance);
+            double transport_costs = board.get_transport_cost(balance);
+            BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
+            double heuristic_value = heuristic.getHeuristicValue(board);
+            String debug_out = String.format("Step metrics: Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f",
+                bike_income, transport_costs, (bike_income+transport_costs), heuristic_value);
+            System.out.println(debug_out);
+        }
+
         return retval;
 
     }

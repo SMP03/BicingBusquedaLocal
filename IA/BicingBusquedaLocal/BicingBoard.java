@@ -156,24 +156,7 @@ public class BicingBoard {
     */
     public double first_criterion_heuristic() {
         int[] balance = get_balance();
-
-        double ganancias = 0.0;
-        for (int i = 0; i < get_num_estacions(); ++i) {
-            Estacion est = map.get(i);
-            if (balance[i] > 0) {
-                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
-            }
-            else if (balance[i] < 0) {
-                if (est.getDemanda() >= est.getNumBicicletasNext()) {
-                    ganancias += balance[i];
-                }
-                else {
-                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
-                }
-                
-            }
-        }
-        return ganancias;
+        return get_bike_income(balance);
     }
 
     /* Both criteria heuristic:
@@ -185,44 +168,12 @@ public class BicingBoard {
     */
     public double both_criteria_heuristic() {
         int[] balance = get_balance();
-
-        double ganancias = 0.0;
-        for (int i = 0; i < get_num_estacions(); ++i) {
-            Estacion est = map.get(i);
-            if (balance[i] > 0) {
-                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
-            }
-            else if (balance[i] < 0) {
-                if (est.getDemanda() >= est.getNumBicicletasNext()) {
-                    ganancias += balance[i];
-                }
-                else {
-                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
-                }
-                
-            }
-        }
-
-        for (int i = 0; i < get_n_furgos(); ++i) {
-            int bikes_taken = moves[i][BIKES_TAKEN];
-            int bikes_dropped = moves[i][BIKES_DROPPED];
-            int departure = moves[i][DEPARTURE];
-            int first_dropoff = moves[i][FIRST_DROPOFF];
-            int second_dropoff = moves[i][SECOND_DROPOFF];
-
-            Estacion departure_est = map.get(departure);
-            Estacion first_dropoff_est = map.get(first_dropoff);
-            ganancias -= manhattan_dist(departure_est, first_dropoff_est) * ((bikes_taken + 9) / 10);
-            if (second_dropoff != -1) {
-                Estacion second_dropoff_est = map.get(second_dropoff);
-                ganancias -= manhattan_dist(first_dropoff_est, second_dropoff_est) * ((bikes_taken - bikes_dropped + 9) / 10);
-            }
-        }
-
+        double ganancias = get_bike_income(balance);
+        ganancias += get_transport_cost(balance);
         return ganancias;
     }
 
-    private int[] get_balance() {
+    public int[] get_balance() {
         int[] balance = new int[get_num_estacions()]; // Initialized to 0 (guaranteed by lang spec)
         for (int i = 0; i < get_n_furgos(); ++i) {
             int bikes_taken = moves[i][BIKES_TAKEN];
@@ -242,6 +193,46 @@ public class BicingBoard {
         }
 
         return balance;
+    }
+
+    public double get_bike_income(int[] balance) {
+        double ganancias = 0.0;
+        for (int i = 0; i < get_num_estacions(); ++i) {
+            Estacion est = map.get(i);
+            if (balance[i] > 0) {
+                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+            }
+            else if (balance[i] < 0) {
+                if (est.getDemanda() >= est.getNumBicicletasNext()) {
+                    ganancias += balance[i];
+                }
+                else {
+                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
+                }
+                
+            }
+        }
+        return ganancias;
+    }
+
+    public double get_transport_cost(int[] balance) {
+        double ganancias = 0.0;
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int bikes_taken = moves[i][BIKES_TAKEN];
+            int bikes_dropped = moves[i][BIKES_DROPPED];
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            Estacion departure_est = map.get(departure);
+            Estacion first_dropoff_est = map.get(first_dropoff);
+            ganancias -= manhattan_dist(departure_est, first_dropoff_est) * ((bikes_taken + 9) / 10);
+            if (second_dropoff != -1) {
+                Estacion second_dropoff_est = map.get(second_dropoff);
+                ganancias -= manhattan_dist(first_dropoff_est, second_dropoff_est) * ((bikes_taken - bikes_dropped + 9) / 10);
+            }
+        }
+        return ganancias;
     }
 
     private int manhattan_dist(Estacion e1, Estacion e2) {
