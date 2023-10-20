@@ -135,16 +135,32 @@ public class BicingBoard {
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
         this.moves[furgo_id][DEPARTURE] = new_departure;
         this.moves[furgo_id][BIKES_TAKEN] = bikes_taken;
+        this.moves[furgo_id][BIKES_DROPPED] = Integer.min(this.moves[furgo_id][BIKES_DROPPED], bikes_taken);
+        remove_redundancy(furgo_id);
     }
 
     public void change_first_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
         moves[furgo_id][FIRST_DROPOFF] = new_dropoff;
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
+        remove_redundancy(furgo_id);
     }
 
     public void change_second_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
         moves[furgo_id][SECOND_DROPOFF] = new_dropoff;
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
+        remove_redundancy(furgo_id);
+    }
+
+    private void remove_redundancy(int furgo_id) {
+        if (get_second_dropoff(furgo_id) != -1) { // 2 stops
+            if (get_bikes_second_dropoff(furgo_id) == 0) {
+                moves[furgo_id][SECOND_DROPOFF] = -1;
+            }
+            else if (get_bikes_first_dropoff(furgo_id) == 0) {
+                moves[furgo_id][FIRST_DROPOFF] = moves[furgo_id][SECOND_DROPOFF];
+                moves[furgo_id][SECOND_DROPOFF] = -1;
+            }
+        }
     }
 
     /* Heuristic functions */
@@ -266,12 +282,9 @@ public class BicingBoard {
         return moves[furgo_id][BIKES_TAKEN];
     }
 
-    public int get_first_dropoff(int furgo_id) {
-        return moves[furgo_id][FIRST_DROPOFF];
-    }
-
-    public int get_second_dropoff(int furgo_id) {
-        return moves[furgo_id][SECOND_DROPOFF];
+    public int get_bikes_first_dropoff(int furgo_id) {
+        if (moves[furgo_id][SECOND_DROPOFF] == -1) return moves[furgo_id][BIKES_TAKEN];
+        return moves[furgo_id][BIKES_DROPPED];
     }
 
     public int get_bikes_second_dropoff(int furgo_id) {
@@ -282,8 +295,42 @@ public class BicingBoard {
         return moves[furgo_id][DEPARTURE];
     }
 
+    public int get_first_dropoff(int furgo_id) {
+        return moves[furgo_id][FIRST_DROPOFF];
+    }
+
+    public int get_second_dropoff(int furgo_id) {
+        return moves[furgo_id][SECOND_DROPOFF];
+    }
+ 
+
     public static int get_max_furgos() {
         return max_furgos;
+    }
+
+    public void print_state() {
+        for (int i = 0; i < moves.length; i++) {
+            int departure = get_departure(i);
+            int first_dropoff = get_first_dropoff(i);
+            int second_dropoff = get_second_dropoff(i);
+            int bikes_taken = get_bikes_taken(i);
+            int bikes_dropped = get_bikes_first_dropoff(i);
+            if (second_dropoff != -1) {
+                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                int dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
+                    departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
+                    first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist2,
+                    second_dropoff, get_bikes_second_dropoff(i), map.get(second_dropoff).getDemanda()-map.get(second_dropoff).getNumBicicletasNext(),
+                    (dist1+dist2));
+            }
+            else {
+                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
+                    departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
+                    first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist1);
+            }
+        }
     }
 
     /* Auxiliary */
@@ -322,8 +369,7 @@ public class BicingBoard {
                 moves[i][BIKES_DROPPED] = generator.nextInt(moves[i][BIKES_TAKEN]);
             }
             else {
-                moves[i][BIKES_TAKEN] = 0;
-                moves[i][BIKES_DROPPED] = 0;
+                --i; // Regen
             }
         }
     }

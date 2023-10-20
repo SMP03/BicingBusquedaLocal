@@ -25,7 +25,9 @@ public class Main {
     private static final int INIT_STRATEGY = BicingBoard.MAX_NUM_FURGOS;
 
     public static void Usage() {
-        System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>] [{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}]");
+        System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
+        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}]");
+        System.out.println("\t[{-s|-solutions}]");
         System.out.println("Description:");
         System.out.println(" -If options are not provided console input is used.");
         System.out.println(" -Else program is executed with option values or, if no option provided, default values");
@@ -38,6 +40,7 @@ public class Main {
         Boolean random_map_seed = true;
         int num_of_reps = 1;
         Boolean quiet = false;
+        Boolean print_solutions = false;
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("-mapseed")) {
@@ -60,6 +63,9 @@ public class Main {
                 else if (args[i].equals("-q") || args[i].equals("-quiet")) {
                     quiet = true;
                 }
+                else if (args[i].equals("-s") || args[i].equals("-solutions")) {
+                    print_solutions = true;
+                }
                 else {
                     System.out.printf("Argument \"%s\" is not valid.%n");
                     Usage();
@@ -69,6 +75,7 @@ public class Main {
         }
         else { // Console input
             Scanner in = new Scanner(System.in);
+            String answer;
             System.out.printf("Map Seed? (0=random)%n");
             map_seed = in.nextInt();
             random_map_seed = (map_seed == 0);
@@ -81,9 +88,16 @@ public class Main {
                 num_of_reps = in.nextInt();
             }
             System.out.printf("Quiet? (y/n)%n");
-            String answer = in.next();
+            answer = in.next();
             if (answer.equals("y") || answer.equals("Y")) {
                 quiet = true;
+            }
+            else {
+                System.out.printf("Print solutions? (y/n)%n");
+                answer = in.next();
+                if (answer.equals("y") || answer.equals("Y")) {
+                    print_solutions = true;
+                }
             }
             in.close();
         }
@@ -128,6 +142,10 @@ public class Main {
             double transport_cost = goal.get_transport_cost(balance);
             double heuristic_val = heuristic.getHeuristicValue(goal);
             if (!quiet) {
+                if (print_solutions) {
+                    System.out.println("Solution:");
+                    goal.print_state();
+                }
                 System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f%n",
                 bike_income, transport_cost, (bike_income+transport_cost), heuristic_val);
                 System.out.println("===============================================================================================");

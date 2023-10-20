@@ -56,7 +56,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         //change_departure
         for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
             for (int station_id = 0; station_id < num_estacions; ++station_id) {
-                if (board.is_free_departure(station_id)) {
+                if (board.is_free_departure(station_id) && (board.get_first_dropoff(furgo_id) != station_id) && (board.get_second_dropoff(furgo_id)!=station_id)) {
                     int bicis_no_usades = board.get_bicis_no_usades(station_id);
                     for (int num_bikes = 1; num_bikes <= Math.min((30), bicis_no_usades); ++num_bikes) {
                         BicingBoard successor = new BicingBoard(board);
