@@ -65,7 +65,7 @@ public class BicingBoard {
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
-        max_furgos = num_furgos;
+        max_furgos = Math.min(num_furgos, n_stations);
         switch (init_strategy) {
             case RANDOM_NUM_FURGOS:
                 init_random_num_furgos(init_seed);
