@@ -251,8 +251,8 @@ public class BicingBoard {
         return ganancias;
     }
 
-    private int manhattan_dist(Estacion e1, Estacion e2) {
-        return Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY());
+    private double manhattan_dist(Estacion e1, Estacion e2) {
+        return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000;
     }
 
     /* Goal test */
@@ -316,8 +316,8 @@ public class BicingBoard {
             int bikes_taken = get_bikes_taken(i);
             int bikes_dropped = get_bikes_first_dropoff(i);
             if (second_dropoff != -1) {
-                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
-                int dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
+                double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                double dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
                 System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist2,
@@ -325,7 +325,7 @@ public class BicingBoard {
                     (dist1+dist2));
             }
             else {
-                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                Double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
                 System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist1);
