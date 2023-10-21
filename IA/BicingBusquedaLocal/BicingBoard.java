@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.lang.Math;
 import java.lang.reflect.Array;
+import java.util.Comparator;
 
 import IA.Bicing.Estaciones;
 import IA.Connectat.ES;
+import IA.DoubleArrayComparator;
 import IA.Bicing.Estacion; 
 
 public class BicingBoard {
@@ -401,7 +403,8 @@ public class BicingBoard {
     }
 
     private PriorityQueue<Double[]> best_k_routes(int k) {
-        PriorityQueue<Double[]> pq = new PriorityQueue<>();
+        PriorityQueue<Double[]> pq = new PriorityQueue<Double[]>(new DoubleArrayComparator());
+        
         for(int i = 0; i < map.size(); ++i) {
 
             Estacion e0 = map.get(i);
