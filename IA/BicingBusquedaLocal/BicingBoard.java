@@ -196,6 +196,7 @@ public class BicingBoard {
         return ganancias;
     }
 
+    // not working, out of bounds exception
     public double heuristic_equilibrium() {
         double demand_Inequilibrium = 0; 
         int[] station_Inequilibrium = new int[map.size()];
