@@ -1,10 +1,14 @@
 package IA.BicingBusquedaLocal;
 
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.PriorityQueue;
 import java.lang.Math;
+import java.lang.reflect.Array;
 
 import IA.Bicing.Estaciones;
+import IA.Connectat.ES;
 import IA.Bicing.Estacion; 
 
 public class BicingBoard {
@@ -97,7 +101,7 @@ public class BicingBoard {
     /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_max_num_furgos(int seed) {
         moves = new int[max_furgos][5]; 
-        minimum_distance_init(seed);
+        minimum_distance_init();
         //random_init(seed);
     }
 
@@ -351,11 +355,16 @@ public class BicingBoard {
      * first_dropoff as the nearest station
      * @param seed
      */
-    private void minimum_distance_init(int seed) {
+    private void minimum_distance_init() {
+
         int n_stations = map.size();
         int n_furgos = moves.length;
-        Random generator = new Random(seed);
+
+        PriorityQueue<double[]> pq = best_k_routes(n_furgos);
+
         for(int furgo_id = 0; furgo_id < Math.min(n_furgos, n_stations); ++furgo_id) {
+
+            double remove = ;
             
             int station_id;
             do {
@@ -378,6 +387,67 @@ public class BicingBoard {
             moves[furgo_id][BIKES_DROPPED] = bikes_taken;
             moves[furgo_id][SECOND_DROPOFF] = -1;
         }
+    }
+
+    private PriorityQueue<double[]> best_k_routes(int k) {
+        PriorityQueue<double[]> pq = new PriorityQueue<>(k);
+        for(int i = 0; i < map.size(); ++i) {
+
+            Estacion e0 = map.get(i);
+            int near_stat_id = nearest_station(e0);
+            Estacion near_stat = map.get(near_stat_id);
+
+            double cost_route = cost_one_dropoff(e0, near_stat, near_stat.getDemanda() - near_stat.getNumBicicletasNext());
+
+            boolean add_element = false;
+            if(pq.size() < k) add_element = true;
+            else {
+                double[] min_elem = pq.peek();
+                if(min_elem[0] > cost_route) {
+                    pq.remove();
+                    add_element = true;
+                }
+            } 
+
+            if(add_element) {
+                double[] elem = new double[3];
+                elem[0] = cost_route;
+                elem[1] = (double)i;
+                elem[2] = (double)near_stat_id;
+
+                pq.add(elem);
+            }
+
+        }
+        return pq;
+    }
+
+    /**
+     * 
+     * @param departure
+     * @param destiny
+     * @param bikes_taken
+     * @return cost from departure to destiny taking bikes_taken bikes
+     */
+    private double cost_one_dropoff(Estacion departure, Estacion destiny, int bikes_taken) {
+        double transport_cost = manhattan_dist(departure, destiny) * ((bikes_taken+9)/10);
+        
+        double loss_departure = 0;
+        if(departure.getDemanda() >= departure.getNumBicicletasNext()) //arriben menys bicis de les que es necessiten
+            loss_departure = -bikes_taken;
+        else {
+            loss_departure = Math.min(0, departure.getNumBicicletasNext() - departure.getDemanda() - bikes_taken);
+        }
+
+        double gain_dropoff = 0;
+        if(destiny.getDemanda() <= destiny.getNumBicicletasNext()) //demanda ja coberta
+            gain_dropoff = 0;
+        else { // el que falta per arrivar a la demanda o totes les bicis que portem
+            gain_dropoff = Math.min(bikes_taken, destiny.getDemanda() - destiny.getNumBicicletasNext());
+        }
+
+        
+        return gain_dropoff - loss_departure - transport_cost;
     }
 
     /**
