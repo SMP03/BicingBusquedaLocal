@@ -127,6 +127,9 @@ public class Main {
             // Hill Climbing Search
             Search search = new HillClimbingSearch();
 
+            // Simulated Annealing
+            //Search search = new SimulatedAnnealingSearch();
+
             // Instantiate the SearchAgent object
             SearchAgent agent = new SearchAgent(p, search);
             // We print the results of the search

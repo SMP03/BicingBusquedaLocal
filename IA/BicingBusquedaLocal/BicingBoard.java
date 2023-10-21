@@ -97,8 +97,8 @@ public class BicingBoard {
     /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_max_num_furgos(int seed) {
         moves = new int[max_furgos][5]; 
-        minimum_distance_init(seed);
-        //random_init(seed);
+        //minimum_distance_init(seed);
+        random_init(seed);
     }
 
     /* Initialize with no furgos */
@@ -188,6 +188,35 @@ public class BicingBoard {
         double ganancias = get_bike_income(balance);
         ganancias += get_transport_cost(balance);
         return ganancias;
+    }
+
+    public double heuristic_equilibrium() {
+        double demand_Inequilibrium = 0; 
+        int[] station_Inequilibrium = new int[map.size()];
+
+        for (int station_id = 0; station_id < map.size(); ++station_id) {
+            Estacion station = map.get(station_id);
+            station_Inequilibrium[station_id] = station.getNumBicicletasNext() - station.getDemanda();
+        }
+
+        for (int furgo_id = 0; furgo_id < max_furgos; ++furgo_id) {
+            int bikes_taken = moves[furgo_id][BIKES_TAKEN];
+            int bikes_dropoff1 = moves[furgo_id][BIKES_DROPPED];
+            int bikes_dropoff2 = bikes_taken - bikes_dropoff1;
+            int departure_id = moves[furgo_id][DEPARTURE];
+            int dropoff1_id = moves[furgo_id][FIRST_DROPOFF];
+            int dropoff2_id = moves[furgo_id][SECOND_DROPOFF];
+
+            station_Inequilibrium[departure_id] = station_Inequilibrium[departure_id] - bikes_taken;
+            station_Inequilibrium[dropoff1_id] = station_Inequilibrium[dropoff1_id] + bikes_dropoff1;
+            if (dropoff2_id != -1) station_Inequilibrium[dropoff2_id] = station_Inequilibrium[dropoff2_id] + bikes_dropoff2;
+        }
+
+        for (int station_id = 0; station_id < map.size(); ++station_id) {
+            int inequilibrium = station_Inequilibrium[station_id];
+            demand_Inequilibrium += (double)inequilibrium*inequilibrium;
+        } 
+        return demand_Inequilibrium;
     }
 
     public int[] get_balance() {
@@ -340,6 +369,8 @@ public class BicingBoard {
         return true;
     }
 
+
+    
     /**
      * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
      * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
@@ -364,10 +395,17 @@ public class BicingBoard {
             moves[furgo_id][FIRST_DROPOFF] = id_first_dropoff;
 
             int num_available_bikes = Math.min(30, map.get(moves[furgo_id][DEPARTURE]).getNumBicicletasNoUsadas());
+
+            Estacion nearestE = map.get(id_first_dropoff);
+            int nearestStationNeededBikes = nearestE.getDemanda() - nearestE.getNumBicicletasNext();
+            int bikes_taken = 0;
+            if (nearestStationNeededBikes > 0) {
+                bikes_taken = Math.min(num_available_bikes, nearestStationNeededBikes);
+            }
             
-            int bikes_taken = Math.max(0, num_available_bikes);
-            if(num_available_bikes > 1) 
-                bikes_taken = generator.nextInt(num_available_bikes) + 1;
+            //int bikes_taken = Math.max(0, num_available_bikes);
+            /*if(num_available_bikes > 1) 
+                bikes_taken = generator.nextInt(num_available_bikes) + 1;*/
             
             moves[furgo_id][BIKES_TAKEN] = bikes_taken;        
             moves[furgo_id][BIKES_DROPPED] = bikes_taken;
