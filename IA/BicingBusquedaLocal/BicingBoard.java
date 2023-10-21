@@ -10,7 +10,7 @@ import java.util.Comparator;
 
 import IA.Bicing.Estaciones;
 import IA.Connectat.ES;
-import IA.DoubleArrayComparator;
+import IA.BicingBusquedaLocal.DoubleArrayComparator;
 import IA.Bicing.Estacion; 
 
 public class BicingBoard {
@@ -412,7 +412,8 @@ public class BicingBoard {
             int near_stat_id = nearest_station(e0);
             Estacion near_stat = map.get(near_stat_id);
 
-            int bikes_taken = near_stat.getDemanda() - near_stat.getNumBicicletasNext();
+            //int bikes_taken = near_stat.getDemanda() - near_stat.getNumBicicletasNext();
+            int bikes_taken = get_optimum_bikes(e0, near_stat);
             double cost_route = cost_one_dropoff(e0, near_stat, bikes_taken);
 
             boolean add_element = false;
@@ -465,6 +466,14 @@ public class BicingBoard {
 
         
         return gain_dropoff - loss_departure - transport_cost;
+    }
+
+    private int get_optimum_bikes(Estacion e, Estacion next_e) {
+        int diff_demanda = next_e.getNumBicicletasNext() - next_e.getDemanda();
+        if (diff_demanda > 0) {
+            return Math.min(30, Math.min(diff_demanda, e.getNumBicicletasNoUsadas()));
+        }
+        return 0;
     }
 
     /**
