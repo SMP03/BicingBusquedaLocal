@@ -65,7 +65,7 @@ public class BicingBoard {
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
-        max_furgos = num_furgos;
+        max_furgos = Math.min(num_furgos, n_stations);
         switch (init_strategy) {
             case RANDOM_NUM_FURGOS:
                 init_random_num_furgos(init_seed);
@@ -246,8 +246,8 @@ public class BicingBoard {
         return ganancias;
     }
 
-    private int manhattan_dist(Estacion e1, Estacion e2) {
-        return Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY());
+    private double manhattan_dist(Estacion e1, Estacion e2) {
+        return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000;
     }
 
     /* Goal test */
@@ -311,17 +311,17 @@ public class BicingBoard {
             int bikes_taken = get_bikes_taken(i);
             int bikes_dropped = get_bikes_first_dropoff(i);
             if (second_dropoff != -1) {
-                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
-                int dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
+                double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                double dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist2,
                     second_dropoff, get_bikes_second_dropoff(i), map.get(second_dropoff).getDemanda()-map.get(second_dropoff).getNumBicicletasNext(),
                     (dist1+dist2));
             }
             else {
-                int dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%dkm]-->(id:%d;dp/dm:%d/%d) T:%dkm%n",
+                Double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist1);
             }

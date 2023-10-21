@@ -43,27 +43,27 @@ public class Main {
         Boolean print_solutions = false;
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
-                if (args[i].equals("-m") || args[i].equals("-mapseed")) {
+                if (args[i].equals("-m") || args[i].equals("--mapseed")) {
                     if (i+1 == args.length) {Usage();return;};
                     map_seed = Integer.valueOf(args[i+1]);
                     random_map_seed = false;
                     ++i;
                 }
-                else if (args[i].equals("-i") || args[i].equals("-initseed")) {
+                else if (args[i].equals("-i") || args[i].equals("--initseed")) {
                     if (i+1 == args.length) {Usage();return;};
                     init_seed = Integer.valueOf(args[i+1]);
                     random_init_seed = false;
                     ++i;
                 }
-                else if (args[i].equals("-r") || args[i].equals("-repetitions")) {
+                else if (args[i].equals("-r") || args[i].equals("--repetitions")) {
                     if (i+1 == args.length) {Usage();return;};
                     num_of_reps = Integer.valueOf(args[i+1]);
                     ++i;
                 }
-                else if (args[i].equals("-q") || args[i].equals("-quiet")) {
+                else if (args[i].equals("-q") || args[i].equals("--quiet")) {
                     quiet = true;
                 }
-                else if (args[i].equals("-s") || args[i].equals("-solutions")) {
+                else if (args[i].equals("-s") || args[i].equals("--solutions")) {
                     print_solutions = true;
                 }
                 else {
