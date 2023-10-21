@@ -65,7 +65,7 @@ public class BicingBoard {
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
-        max_furgos = Math.min(num_furgos, n_stations);
+        max_furgos = Math.min(n_stations, num_furgos);
         switch (init_strategy) {
             case RANDOM_NUM_FURGOS:
                 init_random_num_furgos(init_seed);
@@ -97,7 +97,8 @@ public class BicingBoard {
     /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_max_num_furgos(int seed) {
         moves = new int[max_furgos][5]; 
-        random_init(seed);
+        minimum_distance_init(seed);
+        //random_init(seed);
     }
 
     /* Initialize with no furgos */
@@ -313,15 +314,15 @@ public class BicingBoard {
             if (second_dropoff != -1) {
                 double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
                 double dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d) T:%2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist2,
                     second_dropoff, get_bikes_second_dropoff(i), map.get(second_dropoff).getDemanda()-map.get(second_dropoff).getNumBicicletasNext(),
                     (dist1+dist2));
             }
             else {
-                Double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
+                double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d) T:%2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist1);
             }
@@ -337,6 +338,62 @@ public class BicingBoard {
         
 
         return true;
+    }
+
+    /**
+     * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
+     * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
+     * first_dropoff as the nearest station
+     * @param seed
+     */
+    private void minimum_distance_init(int seed) {
+        int n_stations = map.size();
+        int n_furgos = moves.length;
+        Random generator = new Random(seed);
+        for(int furgo_id = 0; furgo_id < Math.min(n_furgos, n_stations); ++furgo_id) {
+            
+            int station_id;
+            do {
+                station_id = generator.nextInt(n_stations);
+            }
+            while(!is_free_departure(station_id));
+
+            moves[furgo_id][DEPARTURE] = station_id;
+
+            int id_first_dropoff = nearest_station(map.get(station_id));
+            moves[furgo_id][FIRST_DROPOFF] = id_first_dropoff;
+
+            int num_available_bikes = Math.min(30, map.get(moves[furgo_id][DEPARTURE]).getNumBicicletasNoUsadas());
+            
+            int bikes_taken = Math.max(0, num_available_bikes);
+            if(num_available_bikes > 1) 
+                bikes_taken = generator.nextInt(num_available_bikes) + 1;
+            
+            moves[furgo_id][BIKES_TAKEN] = bikes_taken;        
+            moves[furgo_id][BIKES_DROPPED] = bikes_taken;
+            moves[furgo_id][SECOND_DROPOFF] = -1;
+        }
+    }
+
+    /**
+     * @param e
+     * @return The id of the station with minimum manhattan distance to e
+     */
+    private int nearest_station(Estacion e) {
+        int station_min = -1;
+        double min_dist = Double.MAX_VALUE; 
+        for(int i = 0; i < map.size(); ++i) {
+            Estacion est = map.get(i);
+            if(est != e) {
+                double dist = manhattan_dist(est, e);
+                
+                if(dist < min_dist) {
+                    station_min = i;
+                    min_dist = dist;
+                }
+            } 
+        }
+        return station_min;
     }
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
