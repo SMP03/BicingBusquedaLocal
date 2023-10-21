@@ -215,17 +215,12 @@ public class BicingBoard {
         double ganancias = 0.0;
         for (int i = 0; i < get_num_estacions(); ++i) {
             Estacion est = map.get(i);
+            
             if (balance[i] > 0) {
-                ganancias += Double.min(balance[i], est.getDemanda()-est.getNumBicicletasNext());
+                if (est.getDemanda() > est.getNumBicicletasNext()) ganancias += Double.min(balance[i], est.getDemanda() - est.getNumBicicletasNext());
             }
             else if (balance[i] < 0) {
-                if (est.getDemanda() >= est.getNumBicicletasNext()) {
-                    ganancias += balance[i];
-                }
-                else {
-                    ganancias += Double.min(0.0, balance[i] + est.getNumBicicletasNext()-est.getDemanda());
-                }
-                
+	            if (est.getNumBicicletasNext() < est.getDemanda()) ganancias += balance[i];
             }
         }
         return ganancias;
