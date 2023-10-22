@@ -22,7 +22,8 @@ public class Main {
     private static final int NUM_STATIONS = 25;
     private static final int NUM_BICYCLES = 1250;
     private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
-    private static final int INIT_STRATEGY = BicingBoard.MIN_DIST;
+    private static final int INIT_STRATEGY = BicingBoard.BEST_K_ROUTES;
+
 
     public static void Usage() {
         System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
@@ -126,6 +127,9 @@ public class Main {
             // Instantiate the search algorithm
             // Hill Climbing Search
             Search search = new HillClimbingSearch();
+
+            // Simulated Annealing
+            //Search search = new SimulatedAnnealingSearch();
 
             // Instantiate the SearchAgent object
             SearchAgent agent = new SearchAgent(p, search);
