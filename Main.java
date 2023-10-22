@@ -24,6 +24,7 @@ public class Main {
     private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
     private static final int INIT_STRATEGY = BicingBoard.BEST_K_ROUTES;
 
+
     public static void Usage() {
         System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
         System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}]");

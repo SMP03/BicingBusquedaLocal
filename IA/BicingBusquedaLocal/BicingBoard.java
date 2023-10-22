@@ -46,7 +46,8 @@ public class BicingBoard {
     public static final int MAX_NUM_FURGOS = 1;
     public static final int EMPTY_FURGOS = 2;
     public static final int BEST_K_ROUTES = 3;
-
+    public static final int MIN_DIST = 4;
+  
     private int [][] moves;
     private static Estaciones map;
     private static int max_furgos;
@@ -85,11 +86,14 @@ public class BicingBoard {
             case EMPTY_FURGOS:
                 empty_furgos();
                 break;
+            case MIN_DIST:
+                moves = new int[max_furgos][5]; 
+                minimum_distance_init(init_seed);
+                break;
             case BEST_K_ROUTES:
                 moves = new int[max_furgos][5]; 
                 best_k_routes();
                 break;
-
             default:
                 break;
         }
