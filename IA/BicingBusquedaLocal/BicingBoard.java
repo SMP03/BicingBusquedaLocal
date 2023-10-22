@@ -87,7 +87,7 @@ public class BicingBoard {
                 break;
             case BEST_K_ROUTES:
                 moves = new int[max_furgos][5]; 
-                minimum_distance_init();
+                best_k_routes();
                 break;
 
             default:
@@ -386,9 +386,9 @@ public class BicingBoard {
      * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
      * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
      * first_dropoff as the nearest station
-     * @param seed
+     * @param
      */
-    private void minimum_distance_init() {
+    private void best_k_routes() {
 
         int n_stations = map.size();
         int n_furgos = moves.length;
