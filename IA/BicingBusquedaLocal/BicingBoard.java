@@ -45,6 +45,7 @@ public class BicingBoard {
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
     public static final int EMPTY_FURGOS = 2;
+    public static final int BEST_K_ROUTES = 3;
 
     private int [][] moves;
     private static Estaciones map;
@@ -84,6 +85,10 @@ public class BicingBoard {
             case EMPTY_FURGOS:
                 empty_furgos();
                 break;
+            case BEST_K_ROUTES:
+                moves = new int[max_furgos][5]; 
+                minimum_distance_init();
+                break;
 
             default:
                 break;
@@ -103,8 +108,7 @@ public class BicingBoard {
     /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
     private void init_max_num_furgos(int seed) {
         moves = new int[max_furgos][5]; 
-        minimum_distance_init();
-        //random_init(seed);
+        random_init(seed);
     }
 
     /* Initialize with no furgos */
