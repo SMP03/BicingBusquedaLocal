@@ -255,6 +255,24 @@ public class BicingBoard {
         return ganancias;
     }
 
+    public double get_total_dist() {
+        double dist = 0.0;
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            Estacion departure_est = map.get(departure);
+            Estacion first_dropoff_est = map.get(first_dropoff);
+            dist += manhattan_dist(departure_est, first_dropoff_est);
+            if (second_dropoff != -1) {
+                Estacion second_dropoff_est = map.get(second_dropoff);
+                dist += manhattan_dist(first_dropoff_est, second_dropoff_est);
+            }
+        }
+        return dist;
+    }
+
     private double manhattan_dist(Estacion e1, Estacion e2) {
         return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000;
     }

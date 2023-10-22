@@ -21,7 +21,7 @@ public class Main {
     private static final int NUM_FURGOS = 5;
     private static final int NUM_STATIONS = 25;
     private static final int NUM_BICYCLES = 1250;
-    private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
+    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
     private static final int INIT_STRATEGY = BicingBoard.MIN_DIST;
 
     public static void Usage() {
@@ -108,6 +108,8 @@ public class Main {
         ArrayList<Double> transport_costs = new ArrayList<Double>();
         ArrayList<Double> heuristics = new ArrayList<Double>();
         ArrayList<Integer> nodes_expanded = new ArrayList<Integer>();
+        ArrayList<Double> total_distances = new ArrayList<Double>();
+        ArrayList<Double> times = new ArrayList<Double>();
 
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
@@ -128,7 +130,9 @@ public class Main {
             Search search = new HillClimbingSearch();
 
             // Instantiate the SearchAgent object
+            long start = System.nanoTime();
             SearchAgent agent = new SearchAgent(p, search);
+            long end = System.nanoTime();
             // We print the results of the search
             if (!quiet) {
                 System.out.println("Actions taken:");
@@ -141,19 +145,23 @@ public class Main {
             double bike_income = goal.get_bike_income(balance);
             double transport_cost = goal.get_transport_cost(balance);
             double heuristic_val = heuristic.getHeuristicValue(goal);
+            double total_distance = goal.get_total_dist();
+            double time = (end-start)/1000000.0;
             if (!quiet) {
                 if (print_solutions) {
                     System.out.println("Solution:");
                     goal.print_state();
                 }
-                System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f%n",
-                bike_income, transport_cost, (bike_income+transport_cost), heuristic_val);
+                System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Execution Time:%15.2f%n",
+                bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
                 System.out.println("===============================================================================================");
             }
             bike_profits.add(bike_income);
             transport_costs.add(transport_cost);
             heuristics.add(heuristic_val);
             nodes_expanded.add(Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded")));
+            total_distances.add(total_distance);
+            times.add(time);
         }
 
         if (num_of_reps > 1) {
@@ -232,6 +240,36 @@ public class Main {
             System.out.printf("  MAX:%15d%n", max_nodes_expanded);
             System.out.printf("  MEAN:%14.2f%n", mean_nodes_expanded);
             System.out.printf("  MIN:%15d%n", min_nodes_expanded);
+
+            System.out.println("Total Distance:");
+            double max_total_distance = Double.MIN_VALUE;
+            double min_total_distance = Double.MAX_VALUE;
+            double mean_total_distance = 0.0;
+            for (int i = 0; i < num_of_reps; ++i) {
+                Double val = total_distances.get(i);
+                if (val > max_total_distance) max_total_distance = val;
+                if (val < min_total_distance) min_total_distance = val;
+                mean_total_distance += val;
+            }
+            mean_total_distance /= num_of_reps;
+            System.out.printf("  MAX:%15.2f%n", max_total_distance);
+            System.out.printf("  MEAN:%14.2f%n", mean_total_distance);
+            System.out.printf("  MIN:%15.2f%n", min_total_distance);
+
+            System.out.println("Exec Time:");
+            double max_time = Double.MIN_VALUE;
+            double min_time = Double.MAX_VALUE;
+            double mean_time = 0.0;
+            for (int i = 0; i < num_of_reps; ++i) {
+                Double val = times.get(i);
+                if (val > max_time) max_time = val;
+                if (val < min_time) min_time = val;
+                mean_time += val;
+            }
+            mean_time /= num_of_reps;
+            System.out.printf("  MAX:%15.2f%n", max_time);
+            System.out.printf("  MEAN:%14.2f%n", mean_time);
+            System.out.printf("  MIN:%15.2f%n", min_time);
 
         }
     }
