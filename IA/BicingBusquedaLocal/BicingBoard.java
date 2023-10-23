@@ -42,6 +42,7 @@ public class BicingBoard {
 
 
     /* Constants to enable use of different initial states algorithms */
+    public static final String[] INIT_NAMES = {"RANDOM_NUM_FURGOS", "MAX_NUM_FURGOS", "EMPTY_FURGOS", "BEST_K_ROUTES", "MIN_DIST"};
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
     public static final int EMPTY_FURGOS = 2;
