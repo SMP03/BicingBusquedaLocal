@@ -9,7 +9,7 @@ set3["OpSet"] <- rep(3, nrow(set3))
 
 
 sets = rbind(set1,set2,set3)
-b <- boxplot(sets$ExecutionTime ~ sets$OpSet)
+b <- boxplot(sets$ExecutionTime ~ sets$OpSet, ylim=c(0,70))
 b <- boxplot(sets$TotalProfit ~ sets$OpSet)
 
 # t.tests comprovant si són iguals els profits
