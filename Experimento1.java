@@ -33,21 +33,24 @@ public class Experimento1 {
             }
             for (int n_map = 0; n_map<num_map_seeds; ++n_map) {
                 int map_seed = (int)(Math.random()*Integer.MAX_VALUE);
-                for (int i = 0; i < set_operators.size(); ++i) {
-                    System.setOut(output_files.get(i));
+                for (int n_rep = 0; n_rep<num_reps; ++n_rep) {
+                    int init_seed = (int)(Math.random()*Integer.MAX_VALUE);
+                    for (int i = 0; i < set_operators.size(); ++i) {
+                        System.setOut(output_files.get(i));
 
-                    String[] ops = new String[6];
-                    ops = set_operators.get(i);
-                    String[] main_args = {"--rformat-no-tags", "-r", Integer.toString(num_reps), "-m", Integer.toString(map_seed),
-                        "--operators", ops[0], ops[1], ops[2], ops[3], ops[4], ops[5]};
-                    if (n_map == 0) {
-                        main_args[0] = "--rformat";
-                    }
-                    try {
-                        Main.main(main_args);
-                    }
-                    catch (Exception e) {
-                        orgStream.println("Exception in Main");
+                        String[] ops = new String[6];
+                        ops = set_operators.get(i);
+                        String[] main_args = {"--rformat-no-tags", "-r", "1", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed),
+                            "--operators", ops[0], ops[1], ops[2], ops[3], ops[4], ops[5]};
+                        if (n_map == 0 && n_rep==0) {
+                            main_args[0] = "--rformat";
+                        }
+                        try {
+                            Main.main(main_args);
+                        }
+                        catch (Exception e) {
+                            orgStream.println("Exception in Main");
+                        }
                     }
                 }
             }
