@@ -1,11 +1,16 @@
 package IA.BicingBusquedaLocal;
 
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.PriorityQueue;
 import java.lang.Math;
+import java.lang.reflect.Array;
+import java.util.Comparator;
 
 import IA.Bicing.Estaciones;
 import IA.Bicing.Estacion; 
+import IA.Connectat.ES;
 
 public class BicingBoard {
     /* Class independent from AIMA classes
@@ -39,6 +44,8 @@ public class BicingBoard {
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
     public static final int EMPTY_FURGOS = 2;
+    public static final int BEST_K_ROUTES = 3;
+    public static final int MIN_DIST = 4;
 
     private int [][] moves;
     private static Estaciones map;
@@ -65,7 +72,7 @@ public class BicingBoard {
 
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
-        max_furgos = Math.min(num_furgos, n_stations);
+        max_furgos = Math.min(n_stations, num_furgos);
         switch (init_strategy) {
             case RANDOM_NUM_FURGOS:
                 init_random_num_furgos(init_seed);
@@ -78,7 +85,14 @@ public class BicingBoard {
             case EMPTY_FURGOS:
                 empty_furgos();
                 break;
-
+            case BEST_K_ROUTES:
+                moves = new int[max_furgos][5];
+                best_k_routes_init();
+                break;
+            case MIN_DIST:
+                moves = new int[max_furgos][5]; 
+                minimum_distance_init(init_seed);
+                break;
             default:
                 break;
         }
@@ -251,6 +265,24 @@ public class BicingBoard {
         return ganancias;
     }
 
+    public double get_total_dist() {
+        double dist = 0.0;
+        for (int i = 0; i < get_n_furgos(); ++i) {
+            int departure = moves[i][DEPARTURE];
+            int first_dropoff = moves[i][FIRST_DROPOFF];
+            int second_dropoff = moves[i][SECOND_DROPOFF];
+
+            Estacion departure_est = map.get(departure);
+            Estacion first_dropoff_est = map.get(first_dropoff);
+            dist += manhattan_dist(departure_est, first_dropoff_est);
+            if (second_dropoff != -1) {
+                Estacion second_dropoff_est = map.get(second_dropoff);
+                dist += manhattan_dist(first_dropoff_est, second_dropoff_est);
+            }
+        }
+        return dist;
+    }
+
     private double manhattan_dist(Estacion e1, Estacion e2) {
         return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000.0;
     }
@@ -318,15 +350,15 @@ public class BicingBoard {
             if (second_dropoff != -1) {
                 double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
                 double dist2 = manhattan_dist(map.get(first_dropoff), map.get(second_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d) T:%2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist2,
                     second_dropoff, get_bikes_second_dropoff(i), map.get(second_dropoff).getDemanda()-map.get(second_dropoff).getNumBicicletasNext(),
                     (dist1+dist2));
             }
             else {
-                Double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
-                System.out.printf("(id:%d;tk/av:%d/%d)--[%.2fkm]-->(id:%d;dp/dm:%d/%d) T:%.2fkm%n",
+                double dist1 = manhattan_dist(map.get(departure), map.get(first_dropoff));
+                System.out.printf("(id:%d;tk/av:%d/%d)--[%2fkm]-->(id:%d;dp/dm:%d/%d) T:%2fkm%n",
                     departure, bikes_taken, map.get(departure).getNumBicicletasNoUsadas(), dist1,
                     first_dropoff, bikes_dropped, map.get(first_dropoff).getDemanda()-map.get(first_dropoff).getNumBicicletasNext(), dist1);
             }
@@ -343,6 +375,164 @@ public class BicingBoard {
 
         return true;
     }
+
+    /**
+     * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
+     * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
+     * first_dropoff as the nearest station
+     * @param seed
+     */
+    private void minimum_distance_init(int seed) {
+        int n_stations = map.size();
+        int n_furgos = moves.length;
+        Random generator = new Random(seed);
+        for(int furgo_id = 0; furgo_id < Math.min(n_furgos, n_stations); ++furgo_id) {
+            
+            int station_id;
+            do {
+                station_id = generator.nextInt(n_stations);
+            }
+            while(!is_free_departure(station_id));
+
+            moves[furgo_id][DEPARTURE] = station_id;
+
+            int id_first_dropoff = nearest_station(map.get(station_id));
+            moves[furgo_id][FIRST_DROPOFF] = id_first_dropoff;
+
+            int num_available_bikes = Math.min(30, map.get(moves[furgo_id][DEPARTURE]).getNumBicicletasNoUsadas());
+            
+            int bikes_taken = Math.max(0, num_available_bikes);
+            if(num_available_bikes > 1) 
+                bikes_taken = generator.nextInt(num_available_bikes) + 1;
+            
+            moves[furgo_id][BIKES_TAKEN] = bikes_taken;        
+            moves[furgo_id][BIKES_DROPPED] = bikes_taken;
+            moves[furgo_id][SECOND_DROPOFF] = -1;
+        }
+    }
+
+    /**
+     * @param e
+     * @return The id of the station with minimum manhattan distance to e
+     */
+    private int nearest_station(Estacion e) {
+        int station_min = -1;
+        double min_dist = Double.MAX_VALUE; 
+        for(int i = 0; i < map.size(); ++i) {
+            Estacion est = map.get(i);
+            if(est != e) {
+                double dist = manhattan_dist(est, e);
+                
+                if(dist < min_dist) {
+                    station_min = i;
+                    min_dist = dist;
+                }
+            } 
+        }
+        return station_min;
+    }
+
+    /* Best k routes */
+    /**
+     * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
+     * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
+     * first_dropoff as the nearest station
+     * @param
+     */
+    private void best_k_routes_init() {
+
+        int n_stations = map.size();
+        int n_furgos = moves.length;
+
+        PriorityQueue<Double[]> pq = best_k_routes(n_furgos);
+
+        for(int furgo_id = 0; furgo_id < Math.min(n_furgos, n_stations); ++furgo_id) {
+
+            Double[] station = pq.remove();
+            
+            moves[furgo_id][DEPARTURE] = station[1].intValue();
+            moves[furgo_id][FIRST_DROPOFF] = station[2].intValue();
+            moves[furgo_id][BIKES_TAKEN] = station[3].intValue();
+            moves[furgo_id][BIKES_DROPPED] = station[3].intValue();
+            moves[furgo_id][SECOND_DROPOFF] = -1;
+        }
+    }
+
+    private PriorityQueue<Double[]> best_k_routes(int k) {
+        PriorityQueue<Double[]> pq = new PriorityQueue<Double[]>(new DoubleArrayComparator());
+        
+        for(int i = 0; i < map.size(); ++i) {
+
+            Estacion e0 = map.get(i);
+            int near_stat_id = nearest_station(e0);
+            Estacion near_stat = map.get(near_stat_id);
+
+            //int bikes_taken = near_stat.getDemanda() - near_stat.getNumBicicletasNext();
+            int bikes_taken = get_optimum_bikes(e0, near_stat);
+            double cost_route = cost_one_dropoff(e0, near_stat, bikes_taken);
+
+            boolean add_element = false;
+            if(pq.size() < k) add_element = true;
+            else {
+                Double[] min_elem = pq.peek();
+                if(min_elem[0] > cost_route) {
+                    pq.remove();
+                    add_element = true;
+                }
+            } 
+
+            if(add_element) {
+                Double[] elem = new Double[4];
+                elem[0] = cost_route;
+                elem[1] = (double)i;
+                elem[2] = (double)near_stat_id;
+                elem[3] = (double)bikes_taken;
+
+                pq.add(elem);
+            }
+
+        }
+        return pq;
+    }
+
+    /**
+     * 
+     * @param departure
+     * @param destiny
+     * @param bikes_taken
+     * @return cost from departure to destiny taking bikes_taken bikes
+     */
+    private double cost_one_dropoff(Estacion departure, Estacion destiny, int bikes_taken) {
+        double transport_cost = manhattan_dist(departure, destiny) * ((bikes_taken+9)/10);
+        
+        double loss_departure = 0;
+        if(departure.getDemanda() >= departure.getNumBicicletasNext()) //arriben menys bicis de les que es necessiten
+            loss_departure = -bikes_taken;
+        else {
+            loss_departure = Math.min(0, departure.getNumBicicletasNext() - departure.getDemanda() - bikes_taken);
+        }
+
+        double gain_dropoff = 0;
+        if(destiny.getDemanda() <= destiny.getNumBicicletasNext()) //demanda ja coberta
+            gain_dropoff = 0;
+        else { // el que falta per arrivar a la demanda o totes les bicis que portem
+            gain_dropoff = Math.min(bikes_taken, destiny.getDemanda() - destiny.getNumBicicletasNext());
+        }
+
+        
+        return gain_dropoff - loss_departure - transport_cost;
+    }
+
+    private int get_optimum_bikes(Estacion e, Estacion next_e) {
+        int diff_demanda = next_e.getNumBicicletasNext() - next_e.getDemanda();
+        if (diff_demanda > 0) {
+            return Math.min(30, Math.min(diff_demanda, e.getNumBicicletasNoUsadas()));
+        }
+        return 0;
+    }
+
+    
+    /* end */
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
     private void random_init(int seed) {

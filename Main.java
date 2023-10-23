@@ -21,12 +21,12 @@ public class Main {
     private static final int NUM_FURGOS = 5;
     private static final int NUM_STATIONS = 25;
     private static final int NUM_BICYCLES = 1250;
-    private static final int SCENERY_TYPE = Estaciones.RUSH_HOUR;
-    private static final int INIT_STRATEGY = BicingBoard.MAX_NUM_FURGOS;
+    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
+    private static final int INIT_STRATEGY = BicingBoard.MIN_DIST;
 
     public static void Usage() {
         System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
-        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}]");
+        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}] [--rformat]");
         System.out.println("\t[{-s|-solutions}]");
         System.out.println("Description:");
         System.out.println(" -If options are not provided console input is used.");
@@ -41,6 +41,7 @@ public class Main {
         int num_of_reps = 1;
         Boolean quiet = false;
         Boolean print_solutions = false;
+        Boolean rformat = false;
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("--mapseed")) {
@@ -66,8 +67,11 @@ public class Main {
                 else if (args[i].equals("-s") || args[i].equals("--solutions")) {
                     print_solutions = true;
                 }
+                else if (args[i].equals("--rformat")) {
+                    rformat = true;
+                }
                 else {
-                    System.out.printf("Argument \"%s\" is not valid.%n");
+                    System.out.printf("Argument \"%s\" is not valid.%n", args[i]);
                     Usage();
                     return;
                 }
@@ -108,18 +112,23 @@ public class Main {
         ArrayList<Double> transport_costs = new ArrayList<Double>();
         ArrayList<Double> heuristics = new ArrayList<Double>();
         ArrayList<Integer> nodes_expanded = new ArrayList<Integer>();
+        ArrayList<Double> total_distances = new ArrayList<Double>();
+        ArrayList<Double> times = new ArrayList<Double>();
 
+        if (rformat) {
+            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime");
+        }
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
-            System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
+            if (!rformat) System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
             BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, INIT_STRATEGY, init_seed);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
             // Create the Problem object
             Problem p = new  Problem(board,
-            new BicingSuccesorFunction(quiet),
+            new BicingSuccesorFunction(quiet, rformat),
             new BicingGoalTest(),
             heuristic);
 
@@ -128,9 +137,11 @@ public class Main {
             Search search = new HillClimbingSearch();
 
             // Instantiate the SearchAgent object
+            long start = System.nanoTime();
             SearchAgent agent = new SearchAgent(p, search);
+            long end = System.nanoTime();
             // We print the results of the search
-            if (!quiet) {
+            if (!quiet && !rformat) {
                 System.out.println("Actions taken:");
                 printActions(agent.getActions());
                 printInstrumentation(agent.getInstrumentation());
@@ -141,22 +152,33 @@ public class Main {
             double bike_income = goal.get_bike_income(balance);
             double transport_cost = goal.get_transport_cost(balance);
             double heuristic_val = heuristic.getHeuristicValue(goal);
+            double total_distance = goal.get_total_dist();
+            double time = (end-start)/1000000.0;
             if (!quiet) {
-                if (print_solutions) {
-                    System.out.println("Solution:");
-                    goal.print_state();
+                if (!rformat) {
+                    if (print_solutions) {
+                        System.out.println("Solution:");
+                        goal.print_state();
+                    }
+                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Execution Time:%15.2f%n",
+                    bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                    System.out.println("===============================================================================================");
                 }
-                System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f%n",
-                bike_income, transport_cost, (bike_income+transport_cost), heuristic_val);
-                System.out.println("===============================================================================================");
+                else {
+                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                } 
             }
-            bike_profits.add(bike_income);
-            transport_costs.add(transport_cost);
-            heuristics.add(heuristic_val);
-            nodes_expanded.add(Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded")));
+            if (!rformat) {
+                bike_profits.add(bike_income);
+                transport_costs.add(transport_cost);
+                heuristics.add(heuristic_val);
+                nodes_expanded.add(Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded")));
+                total_distances.add(total_distance);
+                times.add(time);
+            }
         }
 
-        if (num_of_reps > 1) {
+        if (num_of_reps > 1 && !rformat) {
             System.out.printf("Experiments summary: (%d experiments)%n", num_of_reps);
             System.out.println("Bike Profits:");
             double max_bike_profits = Double.MIN_VALUE;
@@ -232,6 +254,36 @@ public class Main {
             System.out.printf("  MAX:%15d%n", max_nodes_expanded);
             System.out.printf("  MEAN:%14.2f%n", mean_nodes_expanded);
             System.out.printf("  MIN:%15d%n", min_nodes_expanded);
+
+            System.out.println("Total Distance:");
+            double max_total_distance = Double.MIN_VALUE;
+            double min_total_distance = Double.MAX_VALUE;
+            double mean_total_distance = 0.0;
+            for (int i = 0; i < num_of_reps; ++i) {
+                Double val = total_distances.get(i);
+                if (val > max_total_distance) max_total_distance = val;
+                if (val < min_total_distance) min_total_distance = val;
+                mean_total_distance += val;
+            }
+            mean_total_distance /= num_of_reps;
+            System.out.printf("  MAX:%15.2f%n", max_total_distance);
+            System.out.printf("  MEAN:%14.2f%n", mean_total_distance);
+            System.out.printf("  MIN:%15.2f%n", min_total_distance);
+
+            System.out.println("Exec Time:");
+            double max_time = Double.MIN_VALUE;
+            double min_time = Double.MAX_VALUE;
+            double mean_time = 0.0;
+            for (int i = 0; i < num_of_reps; ++i) {
+                Double val = times.get(i);
+                if (val > max_time) max_time = val;
+                if (val < min_time) min_time = val;
+                mean_time += val;
+            }
+            mean_time /= num_of_reps;
+            System.out.printf("  MAX:%15.2f%n", max_time);
+            System.out.printf("  MEAN:%14.2f%n", mean_time);
+            System.out.printf("  MIN:%15.2f%n", min_time);
 
         }
     }
