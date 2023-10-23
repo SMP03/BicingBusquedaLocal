@@ -26,14 +26,14 @@ public class Main {
 
     public static void Usage() {
         System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
-        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}] [--rformat]");
+        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}] [{--rformat|--rformat-no-tags}]");
         System.out.println("\t[{-s|-solutions}] [--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]");
         System.out.println("Description:");
         System.out.println(" -If options are not provided console input is used.");
         System.out.println(" -Else program is executed with option values or, if no option provided, default values");
     }
 
-    public static void main(String[] args) throws Exception, IOError{
+    public static void main(String[] args) throws Exception{
         int map_seed = 0;
         int init_seed = 0;
         Boolean random_init_seed = true;
@@ -42,6 +42,7 @@ public class Main {
         Boolean quiet = false;
         Boolean print_solutions = false;
         Boolean rformat = false;
+        Boolean rtags = false;
         Boolean operators[] = {true, true, true, true, true, true};
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
@@ -70,6 +71,11 @@ public class Main {
                 }
                 else if (args[i].equals("--rformat")) {
                     rformat = true;
+                    rtags = true;
+                }
+                else if (args[i].equals("--rformat-no-tags")) {
+                    rformat = true;
+                    rtags = false;
                 }
                 else if (args[i].equals("--operators")) {
                     for (int j = 0; j < 6; ++j) {
@@ -127,7 +133,7 @@ public class Main {
         ArrayList<Double> total_distances = new ArrayList<Double>();
         ArrayList<Double> times = new ArrayList<Double>();
 
-        if (rformat) {
+        if (rtags) {
             System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime");
         }
         for (int i = 0; i < num_of_reps; ++i) {
