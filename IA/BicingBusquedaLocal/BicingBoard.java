@@ -284,7 +284,7 @@ public class BicingBoard {
     }
 
     private double manhattan_dist(Estacion e1, Estacion e2) {
-        return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000;
+        return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000.0;
     }
 
     /* Goal test */
