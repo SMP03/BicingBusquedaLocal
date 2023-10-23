@@ -10,13 +10,15 @@ import java.util.List;
  */
 public class BicingSuccesorFunction implements SuccessorFunction{
     private boolean quiet;
+    private boolean rformat;
     
     public BicingSuccesorFunction() {
         quiet = false;
     }
 
-    public BicingSuccesorFunction(Boolean quiet) {
+    public BicingSuccesorFunction(Boolean quiet, Boolean rformat) {
         this.quiet = quiet;
+        this.rformat = rformat;
     }
 
     public List getSuccessors(Object state){
@@ -108,7 +110,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         System.out.println("Num furgos prev:" + board.get_n_furgos());
         System.out.println("=================================");
         */
-        if (!quiet) {
+        if (!quiet && !rformat) {
             int[] balance = board.get_balance();
             double bike_income = board.get_bike_income(balance);
             double transport_costs = board.get_transport_cost(balance);
