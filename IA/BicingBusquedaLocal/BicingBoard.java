@@ -38,9 +38,11 @@ public class BicingBoard {
     public static String CHANGE_DEPARTURE = "CD";
     public static String CHANGE_FIRST_DROPOFF = "CFD";
     public static String CHANGE_SECOND_DROPOFF = "CSD";
+    public static String SWAP_DROPOFFS = "SDP";
 
 
     /* Constants to enable use of different initial states algorithms */
+    public static final String[] INIT_NAMES = {"RANDOM_NUM_FURGOS", "MAX_NUM_FURGOS", "EMPTY_FURGOS", "BEST_K_ROUTES", "MIN_DIST"};
     public static final int RANDOM_NUM_FURGOS = 0;
     public static final int MAX_NUM_FURGOS = 1;
     public static final int EMPTY_FURGOS = 2;
@@ -163,6 +165,13 @@ public class BicingBoard {
         moves[furgo_id][SECOND_DROPOFF] = new_dropoff;
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
         remove_redundancy(furgo_id);
+    }
+
+    public void swap_dropoffs(int furgo_id) {
+        int aux = moves[furgo_id][SECOND_DROPOFF];
+        moves[furgo_id][SECOND_DROPOFF] = moves[furgo_id][FIRST_DROPOFF];
+        moves[furgo_id][FIRST_DROPOFF] = aux;
+        moves[furgo_id][BIKES_DROPPED] = moves[furgo_id][BIKES_TAKEN] - moves[furgo_id][BIKES_DROPPED];
     }
 
     private void remove_redundancy(int furgo_id) {

@@ -22,18 +22,30 @@ public class Main {
     private static final int NUM_STATIONS = 25;
     private static final int NUM_BICYCLES = 1250;
     private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
-    private static final int INIT_STRATEGY = BicingBoard.MIN_DIST;
 
     public static void Usage() {
-        System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
-        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}] [--rformat]");
-        System.out.println("\t[{-s|-solutions}]");
+        System.out.println("Usage: java Main");
+
+        System.out.println("Options:");
+        System.out.println("\t[{-h|--help}]: This manual is printed.");
+
+        System.out.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
+        System.out.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
+        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
+
+        System.out.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
+        System.out.println("\t[--init-strategy <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
+
+        System.out.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
+        System.out.println("\t[{--rformat|--rformat-no-tags}]: Print data in format compatible with r import from text (no-tags removes column names).");
+        System.out.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
+        
         System.out.println("Description:");
-        System.out.println(" -If options are not provided console input is used.");
+        System.out.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
         System.out.println(" -Else program is executed with option values or, if no option provided, default values");
     }
 
-    public static void main(String[] args) throws Exception, IOError{
+    public static void main(String[] args) throws Exception{
         int map_seed = 0;
         int init_seed = 0;
         Boolean random_init_seed = true;
@@ -42,6 +54,9 @@ public class Main {
         Boolean quiet = false;
         Boolean print_solutions = false;
         Boolean rformat = false;
+        Boolean rtags = false;
+        Boolean operators[] = {true, true, true, true, true, true};
+        int init_strategy = BicingBoard.MIN_DIST;
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("--mapseed")) {
@@ -69,6 +84,30 @@ public class Main {
                 }
                 else if (args[i].equals("--rformat")) {
                     rformat = true;
+                    rtags = true;
+                }
+                else if (args[i].equals("--rformat-no-tags")) {
+                    rformat = true;
+                    rtags = false;
+                }
+                else if (args[i].equals("--operators")) {
+                    for (int j = 0; j < 6; ++j) {
+                        if (Integer.valueOf(args[i+1+j]) == 0) {
+                            operators[j] = false;
+                        }
+                        else {
+                            operators[j] = true;
+                        } 
+                    }
+                    i+=6;
+                }
+                else if (args[i].equals("--init-strat")) {
+                    init_strategy = Integer.valueOf(args[i+1]);
+                    i+=1;
+                }
+                else if (args[i].equals("-h") || args[i].equals("--help")) {
+                    Usage();
+                    return;
                 }
                 else {
                     System.out.printf("Argument \"%s\" is not valid.%n", args[i]);
@@ -115,20 +154,20 @@ public class Main {
         ArrayList<Double> total_distances = new ArrayList<Double>();
         ArrayList<Double> times = new ArrayList<Double>();
 
-        if (rformat) {
-            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime");
+        if (rtags) {
+            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime\tNodesExpanded");
         }
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (!rformat) System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
-            BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, INIT_STRATEGY, init_seed);
+            BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, init_strategy, init_seed);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
             // Create the Problem object
             Problem p = new  Problem(board,
-            new BicingSuccesorFunction(quiet, rformat),
+            new BicingSuccesorFunction(quiet, rformat, operators),
             new BicingGoalTest(),
             heuristic);
 
@@ -154,25 +193,26 @@ public class Main {
             double heuristic_val = heuristic.getHeuristicValue(goal);
             double total_distance = goal.get_total_dist();
             double time = (end-start)/1000000.0;
+            int num_of_nodes = Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded"));
             if (!quiet) {
                 if (!rformat) {
                     if (print_solutions) {
                         System.out.println("Solution:");
                         goal.print_state();
                     }
-                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Execution Time:%15.2f%n",
-                    bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Nodes Expanded:%10d | Execution Time:%15.2f%n",
+                    bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, num_of_nodes, time);
                     System.out.println("===============================================================================================");
                 }
                 else {
-                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time, num_of_nodes);
                 } 
             }
             if (!rformat) {
                 bike_profits.add(bike_income);
                 transport_costs.add(transport_cost);
                 heuristics.add(heuristic_val);
-                nodes_expanded.add(Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded")));
+                nodes_expanded.add(num_of_nodes);
                 total_distances.add(total_distance);
                 times.add(time);
             }
