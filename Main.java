@@ -3,6 +3,7 @@ import IA.BicingBusquedaLocal.BicingBoard;
 import IA.BicingBusquedaLocal.BicingGoalTest;
 import IA.BicingBusquedaLocal.BicingHeuristicFunction;
 import IA.BicingBusquedaLocal.BicingSuccesorFunction;
+import IA.BicingBusquedaLocal.BicingSuccesorFunctionSA;
 import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
@@ -35,6 +36,7 @@ public class Main {
 
         System.out.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
         System.out.println("\t[--init-strategy <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
+        System.out.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
 
         System.out.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         System.out.println("\t[{--rformat|--rformat-no-tags}]: Print data in format compatible with r import from text (no-tags removes column names).");
@@ -57,6 +59,12 @@ public class Main {
         Boolean rtags = false;
         Boolean operators[] = {true, true, true, true, true, true};
         int init_strategy = BicingBoard.MIN_DIST;
+        Boolean simulated_annealing = false;
+        int steps = 2000;
+        int stiter = 100;
+        int k = 5;
+        double lamb = 0.001;
+
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("--mapseed")) {
@@ -108,6 +116,19 @@ public class Main {
                 else if (args[i].equals("-h") || args[i].equals("--help")) {
                     Usage();
                     return;
+                }
+                else if (args[i].equals("-sa") || args[i].equals("--simulated-annealing")) {
+                    simulated_annealing = true;
+                    if (args[i+1].equals("default")) {
+                        i+=1;
+                    }
+                    else {
+                        steps = Integer.valueOf(args[i+1]);
+                        stiter = Integer.valueOf(args[i+2]);
+                        k = Integer.valueOf(args[i+3]);
+                        lamb = Double.valueOf(args[i+4]);
+                        i+=4;
+                    }
                 }
                 else {
                     System.out.printf("Argument \"%s\" is not valid.%n", args[i]);
@@ -166,24 +187,39 @@ public class Main {
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
             // Create the Problem object
-            Problem p = new  Problem(board,
-            new BicingSuccesorFunction(quiet, rformat, operators),
-            new BicingGoalTest(),
-            heuristic);
-
-            // Instantiate the search algorithm
-            // Hill Climbing Search
-            Search search = new HillClimbingSearch();
-
-            // Instantiate the SearchAgent object
-            long start = System.nanoTime();
-            SearchAgent agent = new SearchAgent(p, search);
-            long end = System.nanoTime();
+            Problem p;
+            Search search;
+            SearchAgent agent;
+            long start, end;
+            if (!simulated_annealing) {// Hill Climbing Search
+                p = new  Problem(board,
+                new BicingSuccesorFunction(quiet, rformat, operators),
+                new BicingGoalTest(),
+                heuristic);
+                search = new HillClimbingSearch();
+                // Instantiate the SearchAgent object
+                start = System.nanoTime();
+                agent = new SearchAgent(p, search);
+                end = System.nanoTime();
+            }
+            else {// Simulated Annealing Search
+                p = new  Problem(board,
+                new BicingSuccesorFunctionSA(quiet, rformat, operators),
+                new BicingGoalTest(),
+                heuristic);
+                search = new SimulatedAnnealingSearch(steps, stiter, k, lamb);
+                start = System.nanoTime();
+                agent = new SearchAgent(p, search);
+                end = System.nanoTime();
+            }
+ 
             // We print the results of the search
             if (!quiet && !rformat) {
-                System.out.println("Actions taken:");
-                printActions(agent.getActions());
-                printInstrumentation(agent.getInstrumentation());
+                if (!simulated_annealing) {//HC
+                    System.out.println("Actions taken:");
+                    printActions(agent.getActions());
+                    printInstrumentation(agent.getInstrumentation());
+                }
             }
             
             BicingBoard goal = (BicingBoard)search.getGoalState();
