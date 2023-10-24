@@ -39,9 +39,10 @@ public class Main {
         System.out.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
 
         System.out.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
-        System.out.println("\t[{--rformat|--rformat-no-tags}]: Print data in format compatible with r import from text (no-tags removes column names).");
+        System.out.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
         System.out.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
-        
+        System.out.println("\t[--rtrace-cost]: Traces the cost of the solution through the execution of the search algorithm. Compatible with r.");
+
         System.out.println("Description:");
         System.out.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
         System.out.println(" -Else program is executed with option values or, if no option provided, default values");
@@ -56,6 +57,7 @@ public class Main {
         Boolean quiet = false;
         Boolean print_solutions = false;
         Boolean rformat = false;
+        Boolean rtrace = false;
         Boolean rtags = false;
         Boolean operators[] = {true, true, true, true, true, true};
         int init_strategy = BicingBoard.MIN_DIST;
@@ -98,6 +100,10 @@ public class Main {
                     rformat = true;
                     rtags = false;
                 }
+                else if (args[i].equals("--rtrace-cost")) {
+                    rtrace = true;
+                    quiet = true;
+                }
                 else if (args[i].equals("--operators")) {
                     for (int j = 0; j < 6; ++j) {
                         if (Integer.valueOf(args[i+1+j]) == 0) {
@@ -129,6 +135,10 @@ public class Main {
                         lamb = Double.valueOf(args[i+4]);
                         i+=4;
                     }
+                }
+                else if (args[i].equals("--rtrace-cost")) {
+                    Usage();
+                    return;
                 }
                 else {
                     System.out.printf("Argument \"%s\" is not valid.%n", args[i]);
@@ -181,7 +191,7 @@ public class Main {
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
-            if (!rformat) System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
+            if (!rformat && !rtrace) System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
             BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, init_strategy, init_seed);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
@@ -193,7 +203,7 @@ public class Main {
             long start, end;
             if (!simulated_annealing) {// Hill Climbing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunction(quiet, rformat, operators),
+                new BicingSuccesorFunction(quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new HillClimbingSearch();
@@ -204,7 +214,7 @@ public class Main {
             }
             else {// Simulated Annealing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunctionSA(quiet, rformat, operators),
+                new BicingSuccesorFunctionSA(quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new SimulatedAnnealingSearch(steps, stiter, k, lamb);

@@ -13,6 +13,7 @@ import java.util.Random;
 public class BicingSuccesorFunctionSA implements SuccessorFunction{
     private boolean quiet;
     private boolean rformat;
+    private boolean rtrace;
     private boolean operators[];
     private static enum Op {
         AF, RF, CD, CFD, CSD, SDP
@@ -27,9 +28,10 @@ public class BicingSuccesorFunctionSA implements SuccessorFunction{
         }
     }
 
-    public BicingSuccesorFunctionSA(Boolean quiet, Boolean rformat, Boolean[] operators) {
+    public BicingSuccesorFunctionSA(Boolean quiet, Boolean rformat, Boolean rtrace, Boolean[] operators) {
         this.quiet = quiet;
         this.rformat = rformat;
+        this.rtrace = rtrace;
         this.operators = new boolean[6];
         for (int i = 0; i < this.operators.length; i++) {
             this.operators[i] = operators[i];
@@ -199,6 +201,14 @@ public class BicingSuccesorFunctionSA implements SuccessorFunction{
             }
                 break;
         }
+
+        if (rtrace) {
+            int[] balance = board.get_balance();
+            double bike_income = board.get_bike_income(balance);
+            double transport_costs = board.get_transport_cost(balance);
+            System.out.println((bike_income+transport_costs));
+        }
+
         return retval;
 
     }
