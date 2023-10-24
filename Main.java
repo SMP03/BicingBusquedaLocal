@@ -24,12 +24,24 @@ public class Main {
     private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
 
     public static void Usage() {
-        System.out.println("java Main [{-m|-mapseed} <map_seed>] [{-i|-initseed} <init_seed>]");
-        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>] [{-q|-quiet}] [{--rformat|--rformat-no-tags}]");
-        System.out.println("\t[{-s|-solutions}] [--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]");
-        System.out.println("\t[--init-strategy <init_strat_id>] [{-h|--help}]");
+        System.out.println("Usage: java Main");
+
+        System.out.println("Options:");
+        System.out.println("\t[{-h|--help}]: This manual is printed.");
+
+        System.out.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
+        System.out.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
+        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
+
+        System.out.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
+        System.out.println("\t[--init-strategy <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
+
+        System.out.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
+        System.out.println("\t[{--rformat|--rformat-no-tags}]: Print data in format compatible with r import from text (no-tags removes column names).");
+        System.out.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
+        
         System.out.println("Description:");
-        System.out.println(" -If options are not provided console input is used.");
+        System.out.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
         System.out.println(" -Else program is executed with option values or, if no option provided, default values");
     }
 
