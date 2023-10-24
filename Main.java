@@ -143,7 +143,7 @@ public class Main {
         ArrayList<Double> times = new ArrayList<Double>();
 
         if (rtags) {
-            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime");
+            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime\tNodesExpanded");
         }
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
@@ -181,25 +181,26 @@ public class Main {
             double heuristic_val = heuristic.getHeuristicValue(goal);
             double total_distance = goal.get_total_dist();
             double time = (end-start)/1000000.0;
+            int num_of_nodes = Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded"));
             if (!quiet) {
                 if (!rformat) {
                     if (print_solutions) {
                         System.out.println("Solution:");
                         goal.print_state();
                     }
-                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Execution Time:%15.2f%n",
-                    bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Nodes Expanded:%10d | Execution Time:%15.2f%n",
+                    bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, num_of_nodes, time);
                     System.out.println("===============================================================================================");
                 }
                 else {
-                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time);
+                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time, num_of_nodes);
                 } 
             }
             if (!rformat) {
                 bike_profits.add(bike_income);
                 transport_costs.add(transport_cost);
                 heuristics.add(heuristic_val);
-                nodes_expanded.add(Integer.valueOf(agent.getInstrumentation().getProperty("nodesExpanded")));
+                nodes_expanded.add(num_of_nodes);
                 total_distances.add(total_distance);
                 times.add(time);
             }
