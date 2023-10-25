@@ -40,7 +40,8 @@ public class Experimento3_1 {
             System.setOut(outHC);
             String[] main_args = new String[]{"--rtrace-cost", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
             try {
-                Main.main(main_args);
+                Main exec = new Main();
+                exec.main(main_args);
             }
             catch (Exception e) {
                 orgStream.println("Exception in Main");
@@ -50,7 +51,8 @@ public class Experimento3_1 {
             main_args = new String[]{"--rtrace-cost", "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lamb),
                 "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
             try {
-                Main.main(main_args);
+                Main exec = new Main();
+                exec.main(main_args);
             }
             catch (Exception e) {
                 orgStream.println("Exception in Main");
