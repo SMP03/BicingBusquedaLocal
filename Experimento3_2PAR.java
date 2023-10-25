@@ -42,13 +42,16 @@ public class Experimento3_2PAR {
             System.out.println("Output base name?");
             String filename_base = in.next();
 
+            // Init output streams (files)
             ArrayList<PrintStream> outs = new ArrayList<PrintStream>();
             for (int i = 0; i < k.size(); ++i) {
                 for (int l = 0; l < lamb.size(); ++l) {
                     outs.add(new PrintStream(new FileOutputStream(String.format("%s_k%dl%d.txt", filename_base, i, l), false)));
                 }
             }
+            PrintStream hc_out = new PrintStream(new FileOutputStream(String.format("%s_HC.txt", filename_base), false));
 
+            // Create tasks
             ArrayList<Map<String, Object>> tasks = new ArrayList<Map<String, Object>>();
             for (int i = 0; i < nreps; ++i) {
                 int map_seed =(int)(Math.random()*Integer.MAX_VALUE);
@@ -56,6 +59,7 @@ public class Experimento3_2PAR {
                 for (int x = 0; x < k.size(); ++x) {
                     for (int y = 0; y < lamb.size(); ++y) {
                         Map<String, Object> task = new TreeMap<String, Object>();
+                        task.put("hc", false);
                         task.put("out", outs.get(x*lamb.size()+y));
                         task.put("orig", orgStream);
                         task.put("map_seed", map_seed);
@@ -67,21 +71,38 @@ public class Experimento3_2PAR {
                         tasks.add(task);
                     }
                 }
+                Map<String, Object> hc_task = new TreeMap<String, Object>();
+                hc_task.put("hc", true);
+                hc_task.put("out", hc_out);
+                hc_task.put("orig", orgStream);
+                hc_task.put("map_seed", map_seed);
+                hc_task.put("init_seed", init_seed);
+                tasks.add(hc_task);
             }
 
+            // Add tags to files
             for (PrintStream out : outs) {
                 String[] main_args = new String[]{"--rformat", "-q"};
                 try {
                     Main exec = new Main(out);
-                    exec.main(main_args);
+                    exec.execute(main_args);
                 }
                 catch (Exception e) {
                     orgStream.println("Exception in Main");
                 }
 
             }
-            tasks.parallelStream().forEach(t -> 
-                compute((PrintStream)t.get("out"), (PrintStream)t.get("orig"), (int)t.get("map_seed"), (int)t.get("init_seed"), (int)t.get("steps"), (int)t.get("stiter"), (int)t.get("k"), (double)t.get("l")));
+            String[] main_args = new String[]{"--rformat", "-q"};
+            try {
+                Main exec = new Main(hc_out);
+                exec.execute(main_args);
+            }
+            catch (Exception e) {
+                orgStream.println("Exception in Main");
+            }
+
+            // Execute tasks in parallel
+            tasks.parallelStream().forEach(t -> compute(t));
         }
         catch (FileNotFoundException fnfEx) {
             System.out.println("Error in IO redirection");
@@ -92,13 +113,37 @@ public class Experimento3_2PAR {
         }
     }
 
+    private static void compute(Map<String, Object> t) {
+        if ((boolean)t.get("hc")) {
+            compute((PrintStream)t.get("out"), (PrintStream)t.get("orig"), (int)t.get("map_seed"), (int)t.get("init_seed"));
+        }
+        else {
+            compute((PrintStream)t.get("out"), (PrintStream)t.get("orig"), (int)t.get("map_seed"), (int)t.get("init_seed"),
+                (int)t.get("steps"), (int)t.get("stiter"), (int)t.get("k"), (double)t.get("l"));
+        }
+    }
+
+    // SA Compute
     private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed, int steps, int stiter, int k, double l) {
         String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed),
             "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(l)};
         try {
             Main exec = new Main(out);
             orig.printf("Thread %10d: Computing with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
-            exec.main(main_args);
+            exec.execute(main_args);
+        }
+        catch (Exception e) {
+            orig.println("Exception in Main");
+        }
+    }
+
+    // HC Compute
+    private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed) {
+        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
+        try {
+            Main exec = new Main(out);
+            orig.printf("Thread %10d: Computing with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
+            exec.execute(main_args);
         }
         catch (Exception e) {
             orig.println("Exception in Main");

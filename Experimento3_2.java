@@ -57,7 +57,7 @@ public class Experimento3_2 {
                         if (i == 0) main_args[0] = "--rformat";
                         try {
                             Main exec = new Main();
-                            exec.main(main_args);
+                            exec.execute(main_args);
                         }
                         catch (Exception e) {
                             orgStream.println("Exception in Main");

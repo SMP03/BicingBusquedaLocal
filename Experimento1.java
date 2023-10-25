@@ -47,7 +47,7 @@ public class Experimento1 {
                         }
                         try {
                             Main exec = new Main();
-                            exec.main(main_args);
+                            exec.execute(main_args);
                         }
                         catch (Exception e) {
                             orgStream.println("Exception in Main");

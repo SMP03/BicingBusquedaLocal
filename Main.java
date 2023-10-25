@@ -58,7 +58,12 @@ public class Main {
         outStream.println(" -Else program is executed with option values or, if no option provided, default values");
     }
 
-    public void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
+        Main e = new Main();
+        e.execute(args);
+    }
+
+    public void execute(String[] args) throws Exception{
         int map_seed = 0;
         int init_seed = 0;
         Boolean random_init_seed = true;
