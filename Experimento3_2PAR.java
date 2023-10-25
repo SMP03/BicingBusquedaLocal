@@ -129,7 +129,7 @@ public class Experimento3_2PAR {
             "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(l)};
         try {
             Main exec = new Main(out);
-            orig.printf("Thread %10d: Computing with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
+            orig.printf("Thread %4d: Computing SA with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
             exec.execute(main_args);
         }
         catch (Exception e) {
@@ -142,7 +142,7 @@ public class Experimento3_2PAR {
         String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
         try {
             Main exec = new Main(out);
-            orig.printf("Thread %10d: Computing with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
+            orig.printf("Thread %4d: Computing HC with m:%12d, i:%12d%n", Thread.currentThread().getId(), map_seed, init_seed);
             exec.execute(main_args);
         }
         catch (Exception e) {
