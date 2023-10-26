@@ -20,9 +20,6 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
-    private static final int NUM_FURGOS = 5;
-    private static final int NUM_STATIONS = 25;
-    private static final int NUM_BICYCLES = 1250;
     private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
 
     private PrintStream outStream = System.out;
@@ -43,9 +40,10 @@ public class Main {
         outStream.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
         outStream.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
         outStream.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
+        outStream.println("\t[--change-stations <num_of_stations>]: Changes the number of stations, bikes=num_stations*50, furgos=num_stations/5");
 
         outStream.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
-        outStream.println("\t[--init-strategy <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
+        outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
         outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
 
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
@@ -68,6 +66,9 @@ public class Main {
         int init_seed = 0;
         Boolean random_init_seed = true;
         Boolean random_map_seed = true;
+        int num_furgos = 5;
+        int num_stations = 25;
+        int num_bicycles = 1250;
         int num_of_reps = 1;
         Boolean quiet = false;
         Boolean print_solutions = false;
@@ -94,6 +95,12 @@ public class Main {
                     if (i+1 == args.length) {Usage();return;};
                     init_seed = Integer.valueOf(args[i+1]);
                     random_init_seed = false;
+                    ++i;
+                }
+                else if (args[i].equals("--change-stations")) {
+                    num_stations = Integer.valueOf(args[i+1]);
+                    num_bicycles = num_stations*50;
+                    num_furgos = num_stations/5;
                     ++i;
                 }
                 else if (args[i].equals("-r") || args[i].equals("--repetitions")) {
@@ -207,7 +214,7 @@ public class Main {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (!rformat && !rtrace) outStream.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
-            BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, init_strategy, init_seed);
+            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, SCENERY_TYPE, map_seed, init_strategy, init_seed);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 

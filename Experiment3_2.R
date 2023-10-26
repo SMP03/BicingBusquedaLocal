@@ -1,6 +1,6 @@
-base = "test" #Posar el nom base especificat a l'script
-kVals = c(1, 5)#, 25, 125)
-lambdaVals = c(0.5)#0001, 0.001, 0.01, 0.1)
+base = "Overnight" #Posar el nom base especificat a l'script
+kVals = c(50, 75, 100, 125, 150)
+lambdaVals = c(0.00125, 0.00025, 0.00005, 0.00001)
 
 HCData <- read.table(paste(base, "_HC.txt", sep=""), header=TRUE, sep="\t")
 nreps = nrow(HCData)
