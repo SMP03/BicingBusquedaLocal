@@ -49,9 +49,12 @@ public class BicingBoard {
     public static final int BEST_K_ROUTES = 3;
     public static final int MIN_DIST = 4;
 
+    public static final double INIT_FACTOR_HEURISTICA = 0.6;
+
     private int [][] moves;
     private static Estaciones map;
     private static int max_furgos;
+    private double factor_heuristica = 0.f;
 
     /* Constructor */
     public BicingBoard(int[][] moves) {
@@ -65,6 +68,8 @@ public class BicingBoard {
         this.moves = new int[original.moves.length][];
         for (int i = 0; i < original.moves.length; ++i)
             this.moves[i] = original.moves[i].clone();
+        
+        factor_heuristica = Math.min(1, original.factor_heuristica + 0.1);
     }
 
     /* Empty constructor */
@@ -98,6 +103,7 @@ public class BicingBoard {
             default:
                 break;
         }
+        factor_heuristica = INIT_FACTOR_HEURISTICA;
     }
 
     /* Initial State Algorithms */
@@ -209,6 +215,13 @@ public class BicingBoard {
         int[] balance = get_balance();
         double ganancias = get_bike_income(balance);
         ganancias += get_transport_cost(balance);
+        return ganancias;
+    }
+
+    public double dynamic_criterion_heuristic() {
+        int[] balance = get_balance();
+        double ganancias = get_bike_income(balance);
+        ganancias += factor_heuristica*get_transport_cost(balance);
         return ganancias;
     }
 
