@@ -49,7 +49,8 @@ public class BicingBoard {
     public static final int BEST_K_ROUTES = 3;
     public static final int MIN_DIST = 4;
 
-    public static final double INIT_FACTOR_HEURISTICA = 0.6;
+    public static final double INIT_FACTOR_HEURISTICA = 0.0;
+    public static final double VALOR_GRAN = 50000.f;
 
     private int [][] moves;
     private static Estaciones map;
@@ -222,6 +223,7 @@ public class BicingBoard {
         int[] balance = get_balance();
         double ganancias = get_bike_income(balance);
         ganancias += factor_heuristica*get_transport_cost(balance);
+        ganancias += factor_heuristica*VALOR_GRAN;
         return ganancias;
     }
 
