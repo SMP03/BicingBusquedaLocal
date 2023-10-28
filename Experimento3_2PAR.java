@@ -11,6 +11,7 @@ import IA.BicingBusquedaLocal.BicingBoard;
 
 
 public class Experimento3_2PAR {
+    private static int h = 0;
 
     public static void main(String[] args) {
         int steps = 0;
@@ -18,6 +19,7 @@ public class Experimento3_2PAR {
         ArrayList<Integer> k = new ArrayList<Integer>();
         ArrayList<Double> lamb = new ArrayList<Double>();
         int nreps = 0;
+
 
         PrintStream orgStream = null;
 
@@ -39,6 +41,8 @@ public class Experimento3_2PAR {
             while((aux2 = in.nextDouble())!=0.0) {
                 lamb.add(aux2);
             }
+            System.out.println("Heuristic? 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+            h = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
@@ -125,7 +129,7 @@ public class Experimento3_2PAR {
 
     // SA Compute
     private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed, int steps, int stiter, int k, double l) {
-        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed),
+        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h),
             "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(l)};
         try {
             Main exec = new Main(out);
@@ -139,7 +143,7 @@ public class Experimento3_2PAR {
 
     // HC Compute
     private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed) {
-        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
+        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
         try {
             Main exec = new Main(out);
             orig.printf("Thread %4d: Computing HC with m:%12d, i:%12d%n", Thread.currentThread().getId(), map_seed, init_seed);
