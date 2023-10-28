@@ -1,5 +1,5 @@
 base = "defTest" #Posar el nom base especificat a l'script
-kVals = c(1, 5, 25, 50, 100, 200)
+kVals = c(1, 25, 50, 100, 200)
 lambdaVals = c(0.1, 0.01, 0.001, 0.0001, 0.00001)
 decpoint = "."
 noms<-c("Iteration", "SAProfits")
