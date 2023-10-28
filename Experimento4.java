@@ -33,7 +33,7 @@ public class Experimento4 {
             out = new PrintStream(new FileOutputStream(filename_base + "_station.txt", false));
             for (int s = minstations; s <= maxstations; s+=step) {
                 
-                String[] main_args = new String[]{"--rformat-no-tags", "--change-stations", Integer.toString(s)};
+                String[] main_args = new String[]{"--rformat-no-tags", "--change-stations", Integer.toString(s), "-r", Integer.toString(10)};
                 if (s == minstations) main_args[0] = "--rformat";
                 try {
                     Main exec = new Main(out);
