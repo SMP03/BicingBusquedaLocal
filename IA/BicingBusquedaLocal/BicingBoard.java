@@ -220,8 +220,8 @@ public class BicingBoard {
 
     public double dynamic_criterion_heuristic() {
         int[] balance = get_balance();
-        double ganancias = factor_heuristica*get_bike_income(balance);
-        ganancias += get_transport_cost(balance);
+        double ganancias = get_bike_income(balance);
+        ganancias += factor_heuristica*get_transport_cost(balance);
         return ganancias;
     }
 
