@@ -10,7 +10,7 @@ import java.util.Scanner;
 import IA.BicingBusquedaLocal.BicingBoard;
 
 
-public class Experimento3_2PAR {
+public class Experimento3_1multi {
     private static int h = 0;
 
     public static void main(String[] args) {
@@ -28,8 +28,6 @@ public class Experimento3_2PAR {
             orgStream = System.out;
 
             int aux1;
-            System.out.println("Number of repetitions?");
-            nreps = in.nextInt();
             System.out.println("Number of iterations?");
             steps = in.nextInt();
             System.out.println("Values of k? (end with 0)");
@@ -50,60 +48,37 @@ public class Experimento3_2PAR {
             ArrayList<PrintStream> outs = new ArrayList<PrintStream>();
             for (int i = 0; i < k.size(); ++i) {
                 for (int l = 0; l < lamb.size(); ++l) {
-                    outs.add(new PrintStream(new FileOutputStream(String.format("%s_k%dl%d.txt", filename_base, i, l), false)));
+                    outs.add(new PrintStream(new FileOutputStream(String.format("%s_k%dl%d_trace.txt", filename_base, i, l), false)));
                 }
             }
-            PrintStream hc_out = new PrintStream(new FileOutputStream(String.format("%s_HC.txt", filename_base), false));
+            PrintStream hc_out = new PrintStream(new FileOutputStream(String.format("%s_HC_trace.txt", filename_base), false));
 
             // Create tasks
             ArrayList<Map<String, Object>> tasks = new ArrayList<Map<String, Object>>();
-            for (int i = 0; i < nreps; ++i) {
-                int map_seed =(int)(Math.random()*Integer.MAX_VALUE);
-                int init_seed =(int)(Math.random()*Integer.MAX_VALUE);
-                for (int x = 0; x < k.size(); ++x) {
-                    for (int y = 0; y < lamb.size(); ++y) {
-                        Map<String, Object> task = new TreeMap<String, Object>();
-                        task.put("hc", false);
-                        task.put("out", outs.get(x*lamb.size()+y));
-                        task.put("orig", orgStream);
-                        task.put("map_seed", map_seed);
-                        task.put("init_seed", init_seed);
-                        task.put("steps", steps);
-                        task.put("stiter", stiter);
-                        task.put("k", k.get(x));
-                        task.put("l", lamb.get(y));
-                        tasks.add(task);
-                    }
+            int map_seed =(int)(Math.random()*Integer.MAX_VALUE);
+            int init_seed =(int)(Math.random()*Integer.MAX_VALUE);
+            for (int x = 0; x < k.size(); ++x) {
+                for (int y = 0; y < lamb.size(); ++y) {
+                    Map<String, Object> task = new TreeMap<String, Object>();
+                    task.put("hc", false);
+                    task.put("out", outs.get(x*lamb.size()+y));
+                    task.put("orig", orgStream);
+                    task.put("map_seed", map_seed);
+                    task.put("init_seed", init_seed);
+                    task.put("steps", steps);
+                    task.put("stiter", stiter);
+                    task.put("k", k.get(x));
+                    task.put("l", lamb.get(y));
+                    tasks.add(task);
                 }
-                Map<String, Object> hc_task = new TreeMap<String, Object>();
-                hc_task.put("hc", true);
-                hc_task.put("out", hc_out);
-                hc_task.put("orig", orgStream);
-                hc_task.put("map_seed", map_seed);
-                hc_task.put("init_seed", init_seed);
-                tasks.add(hc_task);
             }
-
-            // Add tags to files
-            for (PrintStream out : outs) {
-                String[] main_args = new String[]{"--rformat", "-q"};
-                try {
-                    Main exec = new Main(out);
-                    exec.execute(main_args);
-                }
-                catch (Exception e) {
-                    orgStream.println("Exception in Main");
-                }
-
-            }
-            String[] main_args = new String[]{"--rformat", "-q"};
-            try {
-                Main exec = new Main(hc_out);
-                exec.execute(main_args);
-            }
-            catch (Exception e) {
-                orgStream.println("Exception in Main");
-            }
+            Map<String, Object> hc_task = new TreeMap<String, Object>();
+            hc_task.put("hc", true);
+            hc_task.put("out", hc_out);
+            hc_task.put("orig", orgStream);
+            hc_task.put("map_seed", map_seed);
+            hc_task.put("init_seed", init_seed);
+            tasks.add(hc_task);
 
             // Execute tasks in parallel
             tasks.parallelStream().forEach(t -> compute(t));
@@ -129,8 +104,8 @@ public class Experimento3_2PAR {
 
     // SA Compute
     private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed, int steps, int stiter, int k, double l) {
-        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h),
-            "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(l)};
+        String[] main_args = new String[]{"--rtrace-cost", "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(l),
+        "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
         try {
             Main exec = new Main(out);
             orig.printf("Thread %4d: Computing SA with k:%4d, l:%.6f, steps:%6d, stiter:%4d, m:%12d, i:%12d%n", Thread.currentThread().getId(), k, l, steps, stiter, map_seed, init_seed);
@@ -143,7 +118,7 @@ public class Experimento3_2PAR {
 
     // HC Compute
     private static void compute(PrintStream out, PrintStream orig, int map_seed, int init_seed) {
-        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
+        String[] main_args = new String[]{"--rtrace-cost", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
         try {
             Main exec = new Main(out);
             orig.printf("Thread %4d: Computing HC with m:%12d, i:%12d%n", Thread.currentThread().getId(), map_seed, init_seed);

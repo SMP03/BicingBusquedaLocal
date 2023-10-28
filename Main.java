@@ -50,7 +50,7 @@ public class Main {
         outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
         outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
         outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
-        outStream.println("\t[{-he|--heuristic} 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost]");
+        outStream.println("\t[{-he|--heuristic} <heuristic_num>] Set heuristic (0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost)");
 
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
@@ -169,10 +169,10 @@ public class Main {
                     scenery_type = Estaciones.RUSH_HOUR;
                 }
                 else if (args[i].equals("-he") || args[i].equals("--heuristic")) {
-                    if(i+1 == args.length) Usage();
+                    if(i+1 == args.length) {Usage();return;};
                     heuristic_criterion = Integer.valueOf(args[i+1]);
                     i += 1;
-                    if(heuristic_criterion < 0 || heuristic_criterion > 2) Usage();
+                    if(heuristic_criterion < 0 || heuristic_criterion > 2) {Usage();return;};
                 }
                 else if (args[i].equals("--rtrace-cost")) {
                     Usage();
@@ -242,7 +242,7 @@ public class Main {
             long start, end;
             if (!simulated_annealing) {// Hill Climbing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunction(quiet, rformat, rtrace, operators),
+                new BicingSuccesorFunction(outStream, quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new HillClimbingSearch();
@@ -253,7 +253,7 @@ public class Main {
             }
             else {// Simulated Annealing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunctionSA(quiet, rformat, rtrace, operators),
+                new BicingSuccesorFunctionSA(outStream, quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new SimulatedAnnealingSearch(steps, stiter, k, lamb);

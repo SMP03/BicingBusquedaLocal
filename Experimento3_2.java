@@ -15,6 +15,7 @@ public class Experimento3_2 {
         ArrayList<Integer> k = new ArrayList<Integer>();
         ArrayList<Double> lamb = new ArrayList<Double>();
         int nreps = 0;
+        int h = 0;
 
         PrintStream orgStream = null;
 
@@ -36,6 +37,8 @@ public class Experimento3_2 {
             while((aux2 = in.nextDouble())!=0.0) {
                 lamb.add(aux2);
             }
+            System.out.println("Heuristic? 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+            h = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
@@ -52,7 +55,7 @@ public class Experimento3_2 {
                 for (int x = 0; x < k.size(); ++x) {
                     for (int y = 0; y < lamb.size(); ++y) {
                         System.setOut(outs.get(x*lamb.size()+y));
-                        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed),
+                        String[] main_args = new String[]{"--rformat-no-tags", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h),
                             "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k.get(x)), Double.toString(lamb.get(y))};
                         if (i == 0) main_args[0] = "--rformat";
                         try {

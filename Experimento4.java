@@ -13,6 +13,7 @@ public class Experimento4 {
         int minstations;
         int maxstations;
         int step;
+        int h;
 
         PrintStream orgStream = null;
 
@@ -26,6 +27,8 @@ public class Experimento4 {
             maxstations = in.nextInt();
             System.out.println("Step size?");
             step = in.nextInt();
+            System.out.println("Heuristic? 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+            h = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
@@ -33,7 +36,7 @@ public class Experimento4 {
             out = new PrintStream(new FileOutputStream(filename_base + "_station.txt", false));
             for (int s = minstations; s <= maxstations; s+=step) {
                 
-                String[] main_args = new String[]{"--rformat-no-tags", "--change-stations", Integer.toString(s), "-r", Integer.toString(10)};
+                String[] main_args = new String[]{"--rformat-no-tags", "--change-stations", Integer.toString(s), "-r", Integer.toString(10), "-he", Integer.toString(h)};
                 if (s == minstations) main_args[0] = "--rformat";
                 try {
                     Main exec = new Main(out);

@@ -22,6 +22,8 @@ public class Experimento6 {
             int num_init_reps = in.nextInt();
             System.out.println("Number of repetitions per init seed?");
             int repetitions = in.nextInt();
+            System.out.println("Heuristic? 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+            int h = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
@@ -37,7 +39,7 @@ public class Experimento6 {
                     System.setOut(output_files.get(0));
 
                     String[] main_args_rush = {"--rformat-no-tags", "-r", Integer.toString(repetitions) , "-m", Integer.toString(map_seed), "-i", 
-                                            Integer.toString(init_seed), "-rh"};
+                                            Integer.toString(init_seed), "-rh", "-he", Integer.toString(h)};
                     if (n_map == 0 && n_rep==0) {
                         main_args_rush[0] = "--rformat";
                     }
@@ -51,7 +53,7 @@ public class Experimento6 {
 
                     System.setOut(output_files.get(1));
                     String[] main_args_equilibrium = {"--rformat-no-tags", "-r", Integer.toString(repetitions) , "-m", Integer.toString(map_seed), "-i", 
-                                            Integer.toString(init_seed)};
+                                            Integer.toString(init_seed), "-he", Integer.toString(h)};
                     if (n_map == 0 && n_rep==0) {
                         main_args_equilibrium[0] = "--rformat";
                     }

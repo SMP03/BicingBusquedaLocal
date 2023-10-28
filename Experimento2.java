@@ -39,14 +39,14 @@ public class Experimento2 {
                 for (int i = 0; i < set_init.size(); ++i) {
                     System.setOut(output_files.get(i));
 
-                    String[] main_args = {"--rformat-no-tags", "-r", Integer.toString(num_reps), "-m", Integer.toString(map_seed),
+                    String[] main_args = {"--rformat-no-tags", "-r", Integer.toString(num_reps), "-m", Integer.toString(map_seed), "-he", "0",
                         "--init-strat", Integer.toString(set_init.get(i))};
                     if (n_map == 0) {
                         main_args[0] = "--rformat";
                     }
                     try {
                         Main exec = new Main();
-                        exec.main(main_args);
+                        exec.execute(main_args);
                     }
                     catch (Exception e) {
                         orgStream.println("Exception in Main");

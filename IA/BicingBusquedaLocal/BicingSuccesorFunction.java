@@ -2,6 +2,8 @@ package IA.BicingBusquedaLocal;
 
 import aima.search.framework.SuccessorFunction;
 import aima.search.framework.Successor;
+
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
     private boolean rformat;
     private boolean rtrace;
     private boolean operators[];
+    PrintStream outStream;
     
     public BicingSuccesorFunction() {
         quiet = false;
@@ -21,9 +24,10 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         for (int i = 0; i < operators.length; i++) {
             operators[i] = true;
         }
+        outStream = System.out;
     }
 
-    public BicingSuccesorFunction(Boolean quiet, Boolean rformat, Boolean rtrace, Boolean[] operators) {
+    public BicingSuccesorFunction(PrintStream outStream, Boolean quiet, Boolean rformat, Boolean rtrace, Boolean[] operators) {
         this.quiet = quiet;
         this.rformat = rformat;
         this.rtrace = rtrace;
@@ -31,6 +35,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         for (int i = 0; i < this.operators.length; i++) {
             this.operators[i] = operators[i];
         }
+        this.outStream = outStream; 
     }
 
     public List getSuccessors(Object state){
@@ -136,10 +141,10 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             Successor s = ((Successor)retval.get(i));
             String action = s.getAction();
             BicingBoard bstate = (BicingBoard)s.getState();
-            System.out.println(action + "\th:" + (bstate.first_criterion_heuristic() - prev));
+            outStream.println(action + "\th:" + (bstate.first_criterion_heuristic() - prev));
         }
-        System.out.println("Num furgos prev:" + board.get_n_furgos());
-        System.out.println("=================================");
+        outStream.println("Num furgos prev:" + board.get_n_furgos());
+        outStream.println("=================================");
         */
         if (!quiet && !rformat) {
             int[] balance = board.get_balance();
@@ -149,13 +154,13 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             double heuristic_value = heuristic.getHeuristicValue(board);
             String debug_out = String.format("Step metrics: Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f",
                 bike_income, transport_costs, (bike_income+transport_costs), heuristic_value);
-            System.out.println(debug_out);
+            outStream.println(debug_out);
         }
         if (rtrace) {
             int[] balance = board.get_balance();
             double bike_income = board.get_bike_income(balance);
             double transport_costs = board.get_transport_cost(balance);
-            System.out.println((bike_income+transport_costs));
+            outStream.println((bike_income+transport_costs));
         }
 
         return retval;

@@ -14,6 +14,7 @@ public class Experimento3_1 {
         int stiter = 100;
         int k = 0;
         double lamb = 0.0;
+        int h = 0;
 
         PrintStream orgStream = null;
 
@@ -27,6 +28,8 @@ public class Experimento3_1 {
             k = in.nextInt();
             System.out.println("Value of lambda?");
             lamb = in.nextDouble();
+            System.out.println("Heuristic? 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+            h = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
@@ -38,7 +41,7 @@ public class Experimento3_1 {
             int map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             int init_seed = (int)(Math.random()*Integer.MAX_VALUE);
             System.setOut(outHC);
-            String[] main_args = new String[]{"--rtrace-cost", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
+            String[] main_args = new String[]{"--rtrace-cost", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
             try {
                 Main exec = new Main();
                 exec.execute(main_args);
@@ -49,7 +52,7 @@ public class Experimento3_1 {
 
             System.setOut(outSA);
             main_args = new String[]{"--rtrace-cost", "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lamb),
-                "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed)};
+                "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h)};
             try {
                 Main exec = new Main();
                 exec.execute(main_args);

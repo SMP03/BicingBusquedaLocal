@@ -40,7 +40,7 @@ public class Experimento1 {
 
                         String[] ops = new String[6];
                         ops = set_operators.get(i);
-                        String[] main_args = {"--rformat-no-tags", "-r", "1", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed),
+                        String[] main_args = {"--rformat-no-tags", "-r", "1", "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", "0",
                             "--operators", ops[0], ops[1], ops[2], ops[3], ops[4], ops[5]};
                         if (n_map == 0 && n_rep==0) {
                             main_args[0] = "--rformat";
