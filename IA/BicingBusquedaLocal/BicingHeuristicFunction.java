@@ -9,7 +9,13 @@ import aima.search.framework.HeuristicFunction;
 public class BicingHeuristicFunction implements HeuristicFunction {
 
     public double getHeuristicValue(Object n){
-
-        return -1 *((BicingBoard) n).first_criterion_heuristic();
+        if(((BicingBoard) n).heuristic == ((BicingBoard) n).FIRST_CRITERION_HEURISTIC) {
+            return -1 *((BicingBoard) n).first_criterion_heuristic();
+        }
+        else if(((BicingBoard) n).heuristic == ((BicingBoard) n).BOTH_CRITERION_HEURISTIC) {
+            return -1 *((BicingBoard) n).both_criteria_heuristic();
+        }
+        
+        return -1 *((BicingBoard) n).dynamic_criterion_heuristic();
     }
 }

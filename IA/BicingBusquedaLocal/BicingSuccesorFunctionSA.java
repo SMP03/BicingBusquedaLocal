@@ -4,17 +4,22 @@ import aima.search.framework.SuccessorFunction;
 import aima.search.framework.Successor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 
 /**
  * Created by bejar on 17/01/17
  */
-public class BicingSuccesorFunction implements SuccessorFunction{
+public class BicingSuccesorFunctionSA implements SuccessorFunction{
     private boolean quiet;
     private boolean rformat;
     private boolean rtrace;
     private boolean operators[];
+    private static enum Op {
+        AF, RF, CD, CFD, CSD, SDP
+    }
     
-    public BicingSuccesorFunction() {
+    public BicingSuccesorFunctionSA() {
         quiet = false;
         rformat = false;
         operators = new boolean[6];
@@ -23,7 +28,7 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         }
     }
 
-    public BicingSuccesorFunction(Boolean quiet, Boolean rformat, Boolean rtrace, Boolean[] operators) {
+    public BicingSuccesorFunctionSA(Boolean quiet, Boolean rformat, Boolean rtrace, Boolean[] operators) {
         this.quiet = quiet;
         this.rformat = rformat;
         this.rtrace = rtrace;
@@ -34,7 +39,9 @@ public class BicingSuccesorFunction implements SuccessorFunction{
     }
 
     public List getSuccessors(Object state){
-        ArrayList retval = new ArrayList();
+        ArrayList<Op> operations = new ArrayList<Op>();
+        ArrayList<Integer[]> parameters = new ArrayList<Integer[]>();
+
         BicingBoard board = (BicingBoard) state;
 
         int max_furgo_id = board.get_n_furgos();
@@ -50,10 +57,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                         for (int first_drop = 0; first_drop < num_estacions; ++first_drop) {
                             if (departure != first_drop) {
                                 for (int bicis = 1; bicis <= Math.min((30), bicis_no_usades); ++bicis) {
-
-                                    BicingBoard successor = board.add_furgo(departure, first_drop, bicis);
-                                    String S=new String(BicingBoard.ADD_FURGO + ":\tdep:" + departure + "\tfd:" + first_drop + "\tbicis:" + bicis);
-                                    retval.add(new Successor(S,successor));
+                                    operations.add(Op.AF);
+                                    parameters.add(new Integer[]{departure, first_drop, bicis});
                                 }
                             }
                         }
@@ -65,9 +70,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
         if (operators[1]) {
             //remove_furgo
             for(int id = 0; id < max_furgo_id; ++id) {
-                BicingBoard successor = board.remove_furgo(id);
-                String S=new String(BicingBoard.REMOVE_FURGO + ":\tfid:" + id);
-                retval.add(new Successor(S,successor));
+                operations.add(Op.RF);
+                parameters.add(new Integer[]{id});
             }
         }
         if (operators[2]) {
@@ -77,10 +81,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                     if (board.is_free_departure(station_id) && (board.get_first_dropoff(furgo_id) != station_id) && (board.get_second_dropoff(furgo_id)!=station_id)) {
                         int bicis_no_usades = board.get_bicis_no_usades(station_id);
                         for (int num_bikes = 1; num_bikes <= Math.min((30), bicis_no_usades); ++num_bikes) {
-                            BicingBoard successor = new BicingBoard(board);
-                            successor.change_departure(furgo_id, station_id, num_bikes);
-                            String S = new String(BicingBoard.CHANGE_DEPARTURE + ":\tdep:" + station_id + "\tbicis:" + num_bikes);
-                            retval.add(new Successor(S,successor));
+                            operations.add(Op.CD);
+                            parameters.add(new Integer[]{furgo_id, station_id, num_bikes});
                         }
                     }
                 }
@@ -93,10 +95,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 for (int station_id = 0; station_id < num_estacions; ++station_id) {
                     if (board.get_departure(furgo_id) != station_id && board.get_second_dropoff(furgo_id) != station_id) {
                         for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
-                            BicingBoard successor = new BicingBoard(board);
-                            successor.change_first_dropoff(furgo_id, station_id, bikes_dropped);
-                            String S = new String(BicingBoard.CHANGE_FIRST_DROPOFF + ":\tfd:" + station_id + "\tbdrop:" + bikes_dropped);
-                            retval.add(new Successor(S,successor));
+                            operations.add(Op.CFD);
+                            parameters.add(new Integer[]{furgo_id, station_id, bikes_dropped});
                         }
                     }
                 }
@@ -109,10 +109,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 for (int station_id = 0; station_id < num_estacions; ++station_id) {
                     if (board.get_departure(furgo_id) != station_id && board.get_first_dropoff(furgo_id) != station_id) {
                         for (int bikes_dropped = 0; bikes_dropped <= bikes_taken; ++bikes_dropped) {
-                            BicingBoard successor = new BicingBoard(board);
-                            successor.change_second_dropoff(furgo_id, station_id, bikes_dropped);
-                            String S = new String(BicingBoard.CHANGE_SECOND_DROPOFF + ":\tsd:" + station_id + "\tbdrop:" + bikes_dropped);
-                            retval.add(new Successor(S,successor));
+                            operations.add(Op.CSD);
+                            parameters.add(new Integer[]{furgo_id, station_id, bikes_dropped});
                         }
                     }
                 }
@@ -122,10 +120,8 @@ public class BicingSuccesorFunction implements SuccessorFunction{
             //swap_dropoffs
             for (int furgo_id = 0; furgo_id < max_furgo_id; ++furgo_id) {
                 if (board.get_second_dropoff(furgo_id) != -1) { // Has second dropoff
-                    BicingBoard successor = new BicingBoard(board);
-                    successor.swap_dropoffs(furgo_id);
-                    String S = new String(BicingBoard.SWAP_DROPOFFS + ":\tfurgoid:" + furgo_id);
-                    retval.add(new Successor(S,successor));
+                    operations.add(Op.SDP);
+                    parameters.add(new Integer[]{furgo_id});
                 }
             }
         }
@@ -151,6 +147,61 @@ public class BicingSuccesorFunction implements SuccessorFunction{
                 bike_income, transport_costs, (bike_income+transport_costs), heuristic_value);
             System.out.println(debug_out);
         }
+        Random generator = new Random();
+        ArrayList retval = new ArrayList();
+        int i = generator.nextInt(operations.size());
+        Op operation = operations.get(i);
+        Integer[] params = parameters.get(i);
+        switch (operation) {
+            case AF:
+            {
+                BicingBoard successor = board.add_furgo(params[0], params[1], params[2]);
+                String S=new String(BicingBoard.ADD_FURGO + ":\tdep:" + params[0] + "\tfd:" + params[1] + "\tbicis:" + params[2]);
+                retval.add(new Successor(S,successor));
+            }
+                break;
+            case RF:
+            {
+                BicingBoard successor = board.remove_furgo(params[0]);
+                String S=new String(BicingBoard.REMOVE_FURGO + ":\tfid:" + params[0]);
+                retval.add(new Successor(S,successor));
+            }
+                break;
+            case CD:
+            {
+                BicingBoard successor = new BicingBoard(board);
+                successor.change_departure(params[0], params[1], params[2]);
+                String S = new String(BicingBoard.CHANGE_DEPARTURE + ":\tdep:" + params[1] + "\tbicis:" + params[2]);
+                retval.add(new Successor(S,successor));
+            }  
+                break;
+            case CFD:
+            {
+                BicingBoard successor = new BicingBoard(board);
+                successor.change_first_dropoff(params[0], params[1], params[2]);
+                String S = new String(BicingBoard.CHANGE_FIRST_DROPOFF + ":\tfd:" + params[1] + "\tbdrop:" + params[2]);
+                retval.add(new Successor(S,successor));
+            }
+                break;
+            case CSD:
+            {
+                BicingBoard successor = new BicingBoard(board);
+                successor.change_second_dropoff(params[0], params[1], params[2]);
+                String S = new String(BicingBoard.CHANGE_SECOND_DROPOFF + ":\tsd:" + params[1] + "\tbdrop:" + params[2]);
+                retval.add(new Successor(S,successor));
+            }
+                break;
+            case SDP:
+            {
+                BicingBoard successor = new BicingBoard(board);
+                successor.swap_dropoffs(params[0]);
+                String S = new String(BicingBoard.SWAP_DROPOFFS + ":\tfurgoid:" + params[0]);
+                retval.add(new Successor(S,successor));
+
+            }
+                break;
+        }
+
         if (rtrace) {
             int[] balance = board.get_balance();
             double bike_income = board.get_bike_income(balance);

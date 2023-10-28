@@ -3,6 +3,7 @@ import IA.BicingBusquedaLocal.BicingBoard;
 import IA.BicingBusquedaLocal.BicingGoalTest;
 import IA.BicingBusquedaLocal.BicingHeuristicFunction;
 import IA.BicingBusquedaLocal.BicingSuccesorFunction;
+import IA.BicingBusquedaLocal.BicingSuccesorFunctionSA;
 import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
@@ -11,6 +12,7 @@ import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.SimulatedAnnealingSearch;
 
 import java.io.IOError;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,45 +20,76 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
-    private static final int NUM_FURGOS = 5;
-    private static final int NUM_STATIONS = 25;
-    private static final int NUM_BICYCLES = 1250;
-    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
+    public static final int BIKES_PROFIT_HEURISTIC = 0;
+    public static final int OVERALL_PROFIT_HEURISTIC = 1;
+    public static final int DYNAMIC_PROFIT_HEURISTIC = 2;
 
-    public static void Usage() {
-        System.out.println("Usage: java Main");
+    private static int scenery_type = Estaciones.EQUILIBRIUM;
 
-        System.out.println("Options:");
-        System.out.println("\t[{-h|--help}]: This manual is printed.");
+    private PrintStream outStream = System.out;
 
-        System.out.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
-        System.out.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
-        System.out.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
-
-        System.out.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
-        System.out.println("\t[--init-strategy <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
-
-        System.out.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
-        System.out.println("\t[{--rformat|--rformat-no-tags}]: Print data in format compatible with r import from text (no-tags removes column names).");
-        System.out.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
-        
-        System.out.println("Description:");
-        System.out.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
-        System.out.println(" -Else program is executed with option values or, if no option provided, default values");
+    public Main() {
     }
 
-    public static void main(String[] args) throws Exception{
+    public Main(PrintStream out) {
+        outStream = out;
+    }
+
+    public void Usage() {
+        outStream.println("Usage: java Main");
+
+        outStream.println("Options:");
+        outStream.println("\t[{-h|--help}]: This manual is printed.");
+
+        outStream.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
+        outStream.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
+        outStream.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
+        outStream.println("\t[--change-stations <num_of_stations>]: Changes the number of stations, bikes=num_stations*50, furgos=num_stations/5");
+
+        outStream.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
+        outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
+        outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
+        outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
+        outStream.println("\t[{-he|--heuristic} 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost]");
+
+        outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
+        outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
+        outStream.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
+        outStream.println("\t[--rtrace-cost]: Traces the cost of the solution through the execution of the search algorithm. Compatible with r.");
+
+        outStream.println("Description:");
+        outStream.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
+        outStream.println(" -Else program is executed with option values or, if no option provided, default values");
+    }
+
+    public static void main(String[] args) throws Exception {
+        Main e = new Main();
+        e.execute(args);
+    }
+
+    public void execute(String[] args) throws Exception{
         int map_seed = 0;
         int init_seed = 0;
         Boolean random_init_seed = true;
         Boolean random_map_seed = true;
+        int num_furgos = 5;
+        int num_stations = 25;
+        int num_bicycles = 1250;
         int num_of_reps = 1;
         Boolean quiet = false;
         Boolean print_solutions = false;
         Boolean rformat = false;
+        Boolean rtrace = false;
         Boolean rtags = false;
         Boolean operators[] = {true, true, true, true, true, true};
         int init_strategy = BicingBoard.MIN_DIST;
+        Boolean simulated_annealing = false;
+        int steps = 2000;
+        int stiter = 100;
+        int k = 5;
+        double lamb = 0.001;
+        int heuristic_criterion = 0;
+
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("--mapseed")) {
@@ -69,6 +102,12 @@ public class Main {
                     if (i+1 == args.length) {Usage();return;};
                     init_seed = Integer.valueOf(args[i+1]);
                     random_init_seed = false;
+                    ++i;
+                }
+                else if (args[i].equals("--change-stations")) {
+                    num_stations = Integer.valueOf(args[i+1]);
+                    num_bicycles = num_stations*50;
+                    num_furgos = num_stations/5;
                     ++i;
                 }
                 else if (args[i].equals("-r") || args[i].equals("--repetitions")) {
@@ -90,6 +129,10 @@ public class Main {
                     rformat = true;
                     rtags = false;
                 }
+                else if (args[i].equals("--rtrace-cost")) {
+                    rtrace = true;
+                    quiet = true;
+                }
                 else if (args[i].equals("--operators")) {
                     for (int j = 0; j < 6; ++j) {
                         if (Integer.valueOf(args[i+1+j]) == 0) {
@@ -109,8 +152,34 @@ public class Main {
                     Usage();
                     return;
                 }
+                else if (args[i].equals("-sa") || args[i].equals("--simulated-annealing")) {
+                    simulated_annealing = true;
+                    if (args[i+1].equals("default")) {
+                        i+=1;
+                    }
+                    else {
+                        steps = Integer.valueOf(args[i+1]);
+                        stiter = Integer.valueOf(args[i+2]);
+                        k = Integer.valueOf(args[i+3]);
+                        lamb = Double.valueOf(args[i+4]);
+                        i+=4;
+                    }
+                }
+                else if (args[i].equals("-rh") || args[i].equals("--rush-hour")) {
+                    scenery_type = Estaciones.RUSH_HOUR;
+                }
+                else if (args[i].equals("-he") || args[i].equals("--heuristic")) {
+                    if(i+1 == args.length) Usage();
+                    heuristic_criterion = Integer.valueOf(args[i+1]);
+                    i += 1;
+                    if(heuristic_criterion < 0 || heuristic_criterion > 2) Usage();
+                }
+                else if (args[i].equals("--rtrace-cost")) {
+                    Usage();
+                    return;
+                }
                 else {
-                    System.out.printf("Argument \"%s\" is not valid.%n", args[i]);
+                    outStream.printf("Argument \"%s\" is not valid.%n", args[i]);
                     Usage();
                     return;
                 }
@@ -119,24 +188,24 @@ public class Main {
         else { // Console input
             Scanner in = new Scanner(System.in);
             String answer;
-            System.out.printf("Map Seed? (0=random)%n");
+            outStream.printf("Map Seed? (0=random)%n");
             map_seed = in.nextInt();
             random_map_seed = (map_seed == 0);
-            System.out.printf("Init Strategy Seed? (0=random) (needed for random init_strategy)%n");
+            outStream.printf("Init Strategy Seed? (0=random) (needed for random init_strategy)%n");
             init_seed = in.nextInt();
             random_init_seed = (init_seed == 0);
             num_of_reps = 1;
             if (random_map_seed || random_init_seed) {
-                System.out.printf("Number of repetitions?%n");
+                outStream.printf("Number of repetitions?%n");
                 num_of_reps = in.nextInt();
             }
-            System.out.printf("Quiet? (y/n)%n");
+            outStream.printf("Quiet? (y/n)%n");
             answer = in.next();
             if (answer.equals("y") || answer.equals("Y")) {
                 quiet = true;
             }
             else {
-                System.out.printf("Print solutions? (y/n)%n");
+                outStream.printf("Print solutions? (y/n)%n");
                 answer = in.next();
                 if (answer.equals("y") || answer.equals("Y")) {
                     print_solutions = true;
@@ -155,35 +224,51 @@ public class Main {
         ArrayList<Double> times = new ArrayList<Double>();
 
         if (rtags) {
-            System.out.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime\tNodesExpanded");
+            outStream.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime\tNodesExpanded");
         }
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
-            if (!rformat) System.out.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
-            BicingBoard board = new BicingBoard(NUM_FURGOS, NUM_STATIONS, NUM_BICYCLES, SCENERY_TYPE, map_seed, init_strategy, init_seed);
+            if (!rformat && !rtrace) outStream.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
+            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, scenery_type, map_seed, init_strategy, init_seed, 
+                                                heuristic_criterion);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
             // Create the Problem object
-            Problem p = new  Problem(board,
-            new BicingSuccesorFunction(quiet, rformat, operators),
-            new BicingGoalTest(),
-            heuristic);
-
-            // Instantiate the search algorithm
-            // Hill Climbing Search
-            Search search = new HillClimbingSearch();
-
-            // Instantiate the SearchAgent object
-            long start = System.nanoTime();
-            SearchAgent agent = new SearchAgent(p, search);
-            long end = System.nanoTime();
+            Problem p;
+            Search search;
+            SearchAgent agent;
+            long start, end;
+            if (!simulated_annealing) {// Hill Climbing Search
+                p = new  Problem(board,
+                new BicingSuccesorFunction(quiet, rformat, rtrace, operators),
+                new BicingGoalTest(),
+                heuristic);
+                search = new HillClimbingSearch();
+                // Instantiate the SearchAgent object
+                start = System.nanoTime();
+                agent = new SearchAgent(p, search);
+                end = System.nanoTime();
+            }
+            else {// Simulated Annealing Search
+                p = new  Problem(board,
+                new BicingSuccesorFunctionSA(quiet, rformat, rtrace, operators),
+                new BicingGoalTest(),
+                heuristic);
+                search = new SimulatedAnnealingSearch(steps, stiter, k, lamb);
+                start = System.nanoTime();
+                agent = new SearchAgent(p, search);
+                end = System.nanoTime();
+            }
+ 
             // We print the results of the search
             if (!quiet && !rformat) {
-                System.out.println("Actions taken:");
-                printActions(agent.getActions());
-                printInstrumentation(agent.getInstrumentation());
+                if (!simulated_annealing) {//HC
+                    outStream.println("Actions taken:");
+                    printActions(agent.getActions());
+                    printInstrumentation(agent.getInstrumentation());
+                }
             }
             
             BicingBoard goal = (BicingBoard)search.getGoalState();
@@ -197,15 +282,15 @@ public class Main {
             if (!quiet) {
                 if (!rformat) {
                     if (print_solutions) {
-                        System.out.println("Solution:");
+                        outStream.println("Solution:");
                         goal.print_state();
                     }
-                    System.out.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Nodes Expanded:%10d | Execution Time:%15.2f%n",
+                    outStream.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Nodes Expanded:%10d | Execution Time:%15.2f%n",
                     bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, num_of_nodes, time);
-                    System.out.println("===============================================================================================");
+                    outStream.println("===============================================================================================");
                 }
                 else {
-                    System.out.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time, num_of_nodes);
+                    outStream.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time, num_of_nodes);
                 } 
             }
             if (!rformat) {
@@ -219,8 +304,8 @@ public class Main {
         }
 
         if (num_of_reps > 1 && !rformat) {
-            System.out.printf("Experiments summary: (%d experiments)%n", num_of_reps);
-            System.out.println("Bike Profits:");
+            outStream.printf("Experiments summary: (%d experiments)%n", num_of_reps);
+            outStream.println("Bike Profits:");
             double max_bike_profits = Double.MIN_VALUE;
             double min_bike_profits = Double.MAX_VALUE;
             double mean_bike_profits = 0.0;
@@ -231,11 +316,11 @@ public class Main {
                 mean_bike_profits += val;
             }
             mean_bike_profits /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_bike_profits);
-            System.out.printf("  MEAN:%14.2f%n", mean_bike_profits);
-            System.out.printf("  MIN:%15.2f%n", min_bike_profits);
+            outStream.printf("  MAX:%15.2f%n", max_bike_profits);
+            outStream.printf("  MEAN:%14.2f%n", mean_bike_profits);
+            outStream.printf("  MIN:%15.2f%n", min_bike_profits);
             
-            System.out.println("Transport costs:");
+            outStream.println("Transport costs:");
             double max_transport_costs = Double.MIN_VALUE;
             double min_transport_costs = Double.MAX_VALUE;
             double mean_transport_costs = 0.0;
@@ -246,11 +331,11 @@ public class Main {
                 mean_transport_costs += val;
             }
             mean_transport_costs /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_transport_costs);
-            System.out.printf("  MEAN:%14.2f%n", mean_transport_costs);
-            System.out.printf("  MIN:%15.2f%n", min_transport_costs);
+            outStream.printf("  MAX:%15.2f%n", max_transport_costs);
+            outStream.printf("  MEAN:%14.2f%n", mean_transport_costs);
+            outStream.printf("  MIN:%15.2f%n", min_transport_costs);
 
-            System.out.println("Total benefits:");
+            outStream.println("Total benefits:");
             double max_benefits = Double.MIN_VALUE;
             double min_benefits = Double.MAX_VALUE;
             double mean_benefits = 0.0;
@@ -261,11 +346,11 @@ public class Main {
                 mean_benefits += val;
             }
             mean_benefits /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_benefits);
-            System.out.printf("  MEAN:%14.2f%n", mean_benefits);
-            System.out.printf("  MIN:%15.2f%n", min_benefits);
+            outStream.printf("  MAX:%15.2f%n", max_benefits);
+            outStream.printf("  MEAN:%14.2f%n", mean_benefits);
+            outStream.printf("  MIN:%15.2f%n", min_benefits);
 
-            System.out.println("Heuristic:");
+            outStream.println("Heuristic:");
             double max_heuristic = Double.MIN_VALUE;
             double min_heuristic = Double.MAX_VALUE;
             double mean_heuristic = 0.0;
@@ -276,11 +361,11 @@ public class Main {
                 mean_heuristic += val;
             }
             mean_heuristic /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_heuristic);
-            System.out.printf("  MEAN:%14.2f%n", mean_heuristic);
-            System.out.printf("  MIN:%15.2f%n", min_heuristic);
+            outStream.printf("  MAX:%15.2f%n", max_heuristic);
+            outStream.printf("  MEAN:%14.2f%n", mean_heuristic);
+            outStream.printf("  MIN:%15.2f%n", min_heuristic);
 
-            System.out.println("Nodes expanded:");
+            outStream.println("Nodes expanded:");
             int max_nodes_expanded = Integer.MIN_VALUE;
             int min_nodes_expanded = Integer.MAX_VALUE;
             double mean_nodes_expanded = 0;
@@ -291,11 +376,11 @@ public class Main {
                 mean_nodes_expanded += val;
             }
             mean_nodes_expanded = mean_nodes_expanded / num_of_reps;
-            System.out.printf("  MAX:%15d%n", max_nodes_expanded);
-            System.out.printf("  MEAN:%14.2f%n", mean_nodes_expanded);
-            System.out.printf("  MIN:%15d%n", min_nodes_expanded);
+            outStream.printf("  MAX:%15d%n", max_nodes_expanded);
+            outStream.printf("  MEAN:%14.2f%n", mean_nodes_expanded);
+            outStream.printf("  MIN:%15d%n", min_nodes_expanded);
 
-            System.out.println("Total Distance:");
+            outStream.println("Total Distance:");
             double max_total_distance = Double.MIN_VALUE;
             double min_total_distance = Double.MAX_VALUE;
             double mean_total_distance = 0.0;
@@ -306,11 +391,11 @@ public class Main {
                 mean_total_distance += val;
             }
             mean_total_distance /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_total_distance);
-            System.out.printf("  MEAN:%14.2f%n", mean_total_distance);
-            System.out.printf("  MIN:%15.2f%n", min_total_distance);
+            outStream.printf("  MAX:%15.2f%n", max_total_distance);
+            outStream.printf("  MEAN:%14.2f%n", mean_total_distance);
+            outStream.printf("  MIN:%15.2f%n", min_total_distance);
 
-            System.out.println("Exec Time:");
+            outStream.println("Exec Time:");
             double max_time = Double.MIN_VALUE;
             double min_time = Double.MAX_VALUE;
             double mean_time = 0.0;
@@ -321,27 +406,27 @@ public class Main {
                 mean_time += val;
             }
             mean_time /= num_of_reps;
-            System.out.printf("  MAX:%15.2f%n", max_time);
-            System.out.printf("  MEAN:%14.2f%n", mean_time);
-            System.out.printf("  MIN:%15.2f%n", min_time);
+            outStream.printf("  MAX:%15.2f%n", max_time);
+            outStream.printf("  MEAN:%14.2f%n", mean_time);
+            outStream.printf("  MIN:%15.2f%n", min_time);
 
         }
     }
 
-    private static void printInstrumentation(Properties properties) {
+    private void printInstrumentation(Properties properties) {
         Iterator keys = properties.keySet().iterator();
         while (keys.hasNext()) {
             String key = (String) keys.next();
             String property = properties.getProperty(key);
-            System.out.println(key + " : " + property);
+            outStream.println(key + " : " + property);
         }
         
     }
     
-    private static void printActions(List actions) {
+    private void printActions(List actions) {
         for (int i = 0; i < actions.size(); i++) {
             String action = (String) actions.get(i);
-            System.out.println(action);
+            outStream.println(action);
         }
     }
     
