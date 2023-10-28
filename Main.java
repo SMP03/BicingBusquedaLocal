@@ -20,7 +20,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
-    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
+    private static int scenery_type = Estaciones.EQUILIBRIUM;
 
     private PrintStream outStream = System.out;
 
@@ -45,6 +45,7 @@ public class Main {
         outStream.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
         outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
         outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
+        outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
 
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
@@ -158,6 +159,9 @@ public class Main {
                         i+=4;
                     }
                 }
+                else if (args[i].equals("-rh") || args[i].equals("--rush-hour")) {
+                    scenery_type = Estaciones.RUSH_HOUR;
+                }
                 else if (args[i].equals("--rtrace-cost")) {
                     Usage();
                     return;
@@ -214,7 +218,7 @@ public class Main {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (!rformat && !rtrace) outStream.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
-            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, SCENERY_TYPE, map_seed, init_strategy, init_seed);
+            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, scenery_type, map_seed, init_strategy, init_seed);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
