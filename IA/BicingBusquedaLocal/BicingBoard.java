@@ -56,14 +56,22 @@ public class BicingBoard {
     private static int max_furgos;
     private double factor_heuristica = 0.f;
 
-    /* Constructor */
+    /**
+     * Constructor of BicingBoard with furgo moves
+     * @param moves contains the configuration of the state
+     * @return BicingBoard state
+     */
     public BicingBoard(int[][] moves) {
         this.moves = new int[moves.length][];
         for (int i = 0; i < moves.length; ++i)
             this.moves[i] = moves[i].clone();
     }
 
-    /* Copy constructor (returns copy of the object) */
+    /**
+     * BicingBoard Copy Constructor
+     * @param original contains the BicingBoard to copy
+     * @return copy of the original BicingBoard state
+     */
     public BicingBoard(BicingBoard original) {
         this.moves = new int[original.moves.length][];
         for (int i = 0; i < original.moves.length; ++i)
@@ -72,11 +80,24 @@ public class BicingBoard {
         factor_heuristica = Math.min(1, original.factor_heuristica + 0.1);
     }
 
-    /* Empty constructor */
+    /**
+     * BicingBoard Empty Constructor
+     * @return BicingBoard with empty moves
+     */
     public BicingBoard() {
         moves = new int[0][5];
     }
 
+    /**
+     * Constructor of BicingBoard with custom characteristics
+     * @param num_furgos contains the number of furgos available for the scenario
+     * @param n_stations contains the number of stations for the scenario
+     * @param n_bicycles contains the total number of bycycles of the scenario
+     * @param demand contains the type of demand (equilibrium:0, rushHour:1)
+     * @param map_seed contains seed of the map of stations
+     * @param init_strategy contains state initialization strategy (randomFurgos:0, maxFurgos:1, emptyFurgos:2, bestk_routes:3,min_distance routes:4)
+     * @return BicingBoard state
+     */
     public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
         max_furgos = Math.min(n_stations, num_furgos);
@@ -106,9 +127,10 @@ public class BicingBoard {
         factor_heuristica = INIT_FACTOR_HEURISTICA;
     }
 
-    /* Initial State Algorithms */
-
-    /* Initialize with random number of furgos with random routes (ensuring 3 different stations for each furgo) */
+    /**
+     * Initialization Strategy with random number of furgos with random routes (ensuring 3 different stations for each furgo)
+     * @param seed contains the seed of the random initialization
+     */
     private void init_random_num_furgos(int seed) {
         Random generator = new Random(seed);
         int nfurgos = generator.nextInt(max_furgos)+1; // 1<num_furgos<=max_furgos
@@ -116,20 +138,31 @@ public class BicingBoard {
         random_init(generator.nextInt());
     }
 
-    /* Initialize with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) */
+    /**
+     * Initialization strategy with maximum number of furgos with random routes (ensuring 3 different stations for each furgo) 
+     * @param seed contains the seed of the random initialization of maxFurgos
+     */
     private void init_max_num_furgos(int seed) {
         moves = new int[max_furgos][5]; 
         random_init(seed);
     }
 
-    /* Initialize with no furgos */
+    /**
+     * Initialization Strategy with no furgos
+     */
     private void empty_furgos() {
         moves = new int[0][5]; 
     }
 
     /* Operators */
 
-    /*Returns copy of object with a new furgo in the map*/ 
+    /**
+     * Operator that adds a new furgo with departure station, bikes taken in departure, first dropoff station, bikes left in station is bikes taken, no second dropoff station
+     * @param departure contains the departure station
+     * @param first_dropoff contains the first dropoff station
+     * @param bikes_taken contains the bikes taken in the departure station
+     * @return a new BicingBoard state with the added furgo with its departure, first dropoff, bikes taken and all bikes taken are dropped on the first visited station 
+     */
     public BicingBoard add_furgo(int departure, int first_dropoff, int bikes_taken) {
         BicingBoard new_board = new BicingBoard();
         new_board.moves = Arrays.copyOf(moves, get_n_furgos()+1); // Crea una copia de l'array amb una posició extra
@@ -142,9 +175,15 @@ public class BicingBoard {
         return new_board;
     }
 
-    /*Removes furgo at a specific id
+    /*
      * NOTE:Does not preserve the ids of the previous furgo (for faster implementation)
     */
+
+    /**
+     * Operator that removes furgo at a specific id
+     * @param furgo_id contains the furgo to be removed
+     * @return a new BicingBoard state with the removed furgo
+     */
     public BicingBoard remove_furgo(int furgo_id) {
         BicingBoard new_board = new BicingBoard();
         new_board.moves = Arrays.copyOf(moves, get_n_furgos()-1); // Crea una copia de l'array truncant l'última posició
@@ -154,6 +193,12 @@ public class BicingBoard {
         return new_board;
     }
 
+    /**
+     * Operator that changes departure station for a specific furgo and the bikes taken at the new departure
+     * @param furgo_id contains the furgo you want to change its departure
+     * @param new_departure contains the new departure you want to assign to furgo with furgo_id
+     * @param bikes_taken contains the bikes taken in the new departure station by furgo with furgo_id
+     */
     public void change_departure(int furgo_id, int new_departure, int bikes_taken) {
         this.moves[furgo_id][DEPARTURE] = new_departure;
         this.moves[furgo_id][BIKES_TAKEN] = bikes_taken;
@@ -161,18 +206,34 @@ public class BicingBoard {
         remove_redundancy(furgo_id);
     }
 
+    /**
+     * Operator that changes first dropoff station for a specific furgo and the bikes dropped at the new first dropoff station
+     * @param furgo_id contains the furgo you want to change its first dropoff station to
+     * @param new_dropoff contains the new first dropoff of furgo with furgo_id
+     * @param bikes_dropped contains the bikes dropped in the new first dropoff station by furgo with furgo_id
+     */
     public void change_first_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
         moves[furgo_id][FIRST_DROPOFF] = new_dropoff;
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
         remove_redundancy(furgo_id);
     }
 
+    /**
+     * Operator that changes second dropoff station for a specific furgo and the bikes dropped at the new second dropoff station
+     * @param furgo_id contains the furgo you want to change its second dropoff station to
+     * @param new_dropoff contains the new second dropoff of furgo with furgo_id
+     * @param bikes_dropped contains the bikes dropped in the new second dropoff station by furgo with furgo_id
+     */
     public void change_second_dropoff(int furgo_id, int new_dropoff, int bikes_dropped) {
         moves[furgo_id][SECOND_DROPOFF] = new_dropoff;
         moves[furgo_id][BIKES_DROPPED] = bikes_dropped;
         remove_redundancy(furgo_id);
     }
 
+    /**
+     * Operator that swaps first and second dropoff stations of the same furgo
+     * @param furgo_id contains the furgo you want to swap the first with the second dropoff station
+     */
     public void swap_dropoffs(int furgo_id) {
         int aux = moves[furgo_id][SECOND_DROPOFF];
         moves[furgo_id][SECOND_DROPOFF] = moves[furgo_id][FIRST_DROPOFF];
@@ -180,6 +241,11 @@ public class BicingBoard {
         moves[furgo_id][BIKES_DROPPED] = moves[furgo_id][BIKES_TAKEN] - moves[furgo_id][BIKES_DROPPED];
     }
 
+    /**
+     * Auxiliary function that eliminated redundancies for specific furgo. If there exists second dropoff station and no bikes are left, set second dropoff to nonexistent
+     * and if there are 0 bikes left in first dropoff, swaps first with second dropoff and sets second dropoff to nonexistent
+     * @param furgo_id contains the furgo for which you want to remove redundancies
+     */
     private void remove_redundancy(int furgo_id) {
         if (get_second_dropoff(furgo_id) != -1) { // 2 stops
             if (get_bikes_second_dropoff(furgo_id) == 0) {
@@ -199,6 +265,11 @@ public class BicingBoard {
      * -1€ for each moved bike that gets the station further away from the demand
      * More info: page 5
     */
+
+    /**
+     * First criterion heuristic, only takes into account benefit originated from bike benefits
+     * @return benefits obtained only from bikes, assuming transport to be free
+     */
     public double first_criterion_heuristic() {
         int[] balance = get_balance();
         return get_bike_income(balance);
@@ -211,6 +282,11 @@ public class BicingBoard {
      * Loss of ((number_of_bikes + 9) div 10)€ for each kilometer of trasport done with a furgo
      * More info: page 5
     */
+
+    /**
+     * Both criterion heuristic, takes into account benefit originated from bike benefits and cost of transport
+     * @return returns benefits obtained from bike profits - cost of transport
+     */
     public double both_criteria_heuristic() {
         int[] balance = get_balance();
         double ganancias = get_bike_income(balance);
@@ -218,6 +294,10 @@ public class BicingBoard {
         return ganancias;
     }
 
+    /**
+     * Dynamic criterion heuristic, initially assumes transport cost to be free, then incrementally takes it into account
+     * @return the value for the heuristic
+     */
     public double dynamic_criterion_heuristic() {
         int[] balance = get_balance();
         double ganancias = factor_heuristica*get_bike_income(balance);
