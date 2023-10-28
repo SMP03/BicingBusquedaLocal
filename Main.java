@@ -20,7 +20,11 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
-    private static final int SCENERY_TYPE = Estaciones.EQUILIBRIUM;
+    public static final int BIKES_PROFIT_HEURISTIC = 0;
+    public static final int OVERALL_PROFIT_HEURISTIC = 1;
+    public static final int DYNAMIC_PROFIT_HEURISTIC = 2;
+
+    private static int scenery_type = Estaciones.EQUILIBRIUM;
 
     private PrintStream outStream = System.out;
 
@@ -45,6 +49,8 @@ public class Main {
         outStream.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
         outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
         outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
+        outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
+        outStream.println("\t[{-he|--heuristic} 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost]");
 
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
@@ -79,9 +85,10 @@ public class Main {
         int init_strategy = BicingBoard.MIN_DIST;
         Boolean simulated_annealing = false;
         int steps = 2000;
-        int stiter = 1;
-        int k = 100;
-        double lamb = 0.0001;
+        int stiter = 100;
+        int k = 5;
+        double lamb = 0.001;
+        int heuristic_criterion = 0;
 
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
@@ -158,6 +165,15 @@ public class Main {
                         i+=4;
                     }
                 }
+                else if (args[i].equals("-rh") || args[i].equals("--rush-hour")) {
+                    scenery_type = Estaciones.RUSH_HOUR;
+                }
+                else if (args[i].equals("-he") || args[i].equals("--heuristic")) {
+                    if(i+1 == args.length) Usage();
+                    heuristic_criterion = Integer.valueOf(args[i+1]);
+                    i += 1;
+                    if(heuristic_criterion < 0 || heuristic_criterion > 2) Usage();
+                }
                 else if (args[i].equals("--rtrace-cost")) {
                     Usage();
                     return;
@@ -214,7 +230,8 @@ public class Main {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (random_init_seed) init_seed = (int)(Math.random()*Integer.MAX_VALUE);
             if (!rformat && !rtrace) outStream.printf("Rep#%d: MapSeed:%d InitStratSeed:%d%n", i, map_seed, init_seed);
-            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, SCENERY_TYPE, map_seed, init_strategy, init_seed);
+            BicingBoard board = new BicingBoard(num_furgos, num_stations, num_bicycles, scenery_type, map_seed, init_strategy, init_seed, 
+                                                heuristic_criterion);
 
             BicingHeuristicFunction heuristic = new BicingHeuristicFunction();
 
