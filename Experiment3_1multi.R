@@ -1,6 +1,6 @@
-base = "test" #Posar el nom base especificat a l'script
-kVals = c(1, 5, 25, 125)
-lambdaVals = c(0.1, 0.01, 0.001, 0.0001)
+base = "defTest" #Posar el nom base especificat a l'script
+kVals = c(1, 5, 25, 50, 100, 200)
+lambdaVals = c(0.1, 0.01, 0.001, 0.0001, 0.00001)
 decpoint = "."
 noms<-c("Iteration", "SAProfits")
 nk = length(kVals)
@@ -38,7 +38,7 @@ for (i in c(0:(nk-1))) {
     par(mar=c(3, 3, 1, 1))
     plot(expData$Iteration, expData$SAProfits, type="l", ylim=c(ymin, ymax), xlim=c(0,xmax), xlab="", ylab="")
     abline(h=HCMaxProfit, col="red")
-    #title(paste(base, " k:", kVals[i+1], " lambda:", lambdaVals[j+1], sep=""))
+    title(paste(base, " k:", kVals[i+1], " lambda:", lambdaVals[j+1], sep=""))
   }
 }
 
