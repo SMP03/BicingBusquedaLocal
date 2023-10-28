@@ -242,7 +242,7 @@ public class Main {
             long start, end;
             if (!simulated_annealing) {// Hill Climbing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunction(quiet, rformat, rtrace, operators),
+                new BicingSuccesorFunction(outStream, quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new HillClimbingSearch();
@@ -253,7 +253,7 @@ public class Main {
             }
             else {// Simulated Annealing Search
                 p = new  Problem(board,
-                new BicingSuccesorFunctionSA(quiet, rformat, rtrace, operators),
+                new BicingSuccesorFunctionSA(outStream, quiet, rformat, rtrace, operators),
                 new BicingGoalTest(),
                 heuristic);
                 search = new SimulatedAnnealingSearch(steps, stiter, k, lamb);
