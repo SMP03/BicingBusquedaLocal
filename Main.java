@@ -79,9 +79,9 @@ public class Main {
         int init_strategy = BicingBoard.MIN_DIST;
         Boolean simulated_annealing = false;
         int steps = 2000;
-        int stiter = 100;
-        int k = 5;
-        double lamb = 0.001;
+        int stiter = 1;
+        int k = 100;
+        double lamb = 0.0001;
 
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {

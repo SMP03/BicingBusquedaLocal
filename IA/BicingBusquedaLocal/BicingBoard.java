@@ -49,7 +49,7 @@ public class BicingBoard {
     public static final int BEST_K_ROUTES = 3;
     public static final int MIN_DIST = 4;
 
-    public static final double INIT_FACTOR_HEURISTICA = 0.6;
+    public static final double INIT_FACTOR_HEURISTICA = 0.7;
 
     private int [][] moves;
     private static Estaciones map;
