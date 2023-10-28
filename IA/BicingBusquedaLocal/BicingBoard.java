@@ -11,6 +11,7 @@ import java.util.Comparator;
 import IA.Bicing.Estaciones;
 import IA.Bicing.Estacion; 
 import IA.Connectat.ES;
+import aima.search.framework.HeuristicFunction;
 
 public class BicingBoard {
     /* Class independent from AIMA classes
@@ -49,6 +50,11 @@ public class BicingBoard {
     public static final int BEST_K_ROUTES = 3;
     public static final int MIN_DIST = 4;
 
+    public static final int FIRST_CRITERION_HEURISTIC = 0;
+    public static final int BOTH_CRITERION_HEURISTIC = 1;
+    public static final int DYNAMIC_CRITERION_HEURISTIC = 2;
+    public static int heuristic = 0;
+
     public static final double INIT_FACTOR_HEURISTICA = 0.0;
     public static final double VALOR_GRAN = 50000.f;
 
@@ -56,6 +62,7 @@ public class BicingBoard {
     private static Estaciones map;
     private static int max_furgos;
     private double factor_heuristica = 0.f;
+    
 
     /* Constructor */
     public BicingBoard(int[][] moves) {
@@ -78,7 +85,7 @@ public class BicingBoard {
         moves = new int[0][5];
     }
 
-    public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
+    public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed, int heurist) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
         max_furgos = Math.min(n_stations, num_furgos);
         switch (init_strategy) {
@@ -105,6 +112,7 @@ public class BicingBoard {
                 break;
         }
         factor_heuristica = INIT_FACTOR_HEURISTICA;
+        heuristic = heurist;
     }
 
     /* Initial State Algorithms */
