@@ -1,6 +1,6 @@
 base = "testHeur0" #Posar el nom base especificat a l'script
-kVals = c(1, 25, 50, 100, 200)
-lambdaVals = c(0.1, 0.01, 0.001, 0.0001, 0.00001)
+kVals = c(1, 25, 125)
+lambdaVals = c(0.1, 0.01, 0.001, 0.0001)
 decpoint = "."
 noms<-c("Iteration", "SAProfits")
 nk = length(kVals)
