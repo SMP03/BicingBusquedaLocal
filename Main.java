@@ -84,10 +84,10 @@ public class Main {
         Boolean operators[] = {true, true, true, true, true, true};
         int init_strategy = BicingBoard.MIN_DIST;
         Boolean simulated_annealing = false;
-        int steps = 2000;
-        int stiter = 100;
-        int k = 5;
-        double lamb = 0.001;
+        int steps = 50000;
+        int stiter = 1;
+        int k = 25;
+        double lamb = 0.0001;
         int heuristic_criterion = 0;
 
         if (args.length >= 1) {
