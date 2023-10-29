@@ -1,4 +1,5 @@
-base = "Experiment2Data/20map50rep" #Posar el nom base especificat a l'script
+# Script experiment 2
+base = "Experiment2Data/20map50rep" # Posar el nom base especificat a l'script
 noms<-c("RANDOM_NUM_FURGOS", "MAX_NUM_FURGOS", "EMPTY_FURGOS", "BEST_K_ROUTES", "MIN_DIST")
 
 RNF <- read.table(paste(base, "_", noms[1], ".txt", sep=""), header=TRUE, sep="\t")
@@ -28,6 +29,7 @@ b <- boxplot(expData$TotalProfit ~ expData$InitStrat,
              xlab="Estrategia de inicialización", ylab="Beneficio total (€)",
              main = "Beneficio obtenido en función de la estrategia de inicialización")
 
+# Gràfics per mapes individuals
 # for (map in unique(expData$MapSeed)) {
 #   singleMapData <- subset(expData, MapSeed==map)
 #   b <- boxplot(singleMapData$TotalProfit ~ singleMapData$InitStrat, ylim=c(-100,100))

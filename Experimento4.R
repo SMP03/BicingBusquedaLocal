@@ -1,3 +1,4 @@
+# Script experimento 4
 base = "test" #Posar el nom base especificat a l'script
 min = 25
 max = 200

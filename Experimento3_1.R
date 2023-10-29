@@ -1,3 +1,4 @@
+# Script experimento 3 gráfico individual beneficio~iteración
 base = "fig6_3_3" #Posar el nom base especificat a l'script
 noms<-c("Iteration", "SAProfits")
 

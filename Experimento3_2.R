@@ -1,28 +1,8 @@
-# base = "Overnight" #Posar el nom base especificat a l'script
-# kVals = c(50, 75, 100, 125, 150)
-# lambdaVals = c(0.00125, 0.00025, 0.00005, 0.00001)
-# decpoint = "."
-
-# base = "Experiment3_2Data/test1" #Posar el nom base especificat a l'script
-# kVals = c(1, 25, 50, 100, 200)
-# lambdaVals = c(1, 0.1, 0.01, 0.001, 0.0001)
-# decpoint = "."
-
+# Script experimento 3 tabla de valores del beneficio obtenido para combinaciones de valores de k y v
 base = "Experiment3_PCLUCA_50Reps/test" #Posar el nom base especificat a l'script
-kVals = c(1, 25, 50, 100, 200)
-lambdaVals = c(0.1, 0.01, 0.001, 0.0001, 0.00001)
+kVals = c(1, 25, 50, 100, 200) #Posar valors de k especificats a l'script generador (en el mateix ordre)
+lambdaVals = c(0.1, 0.01, 0.001, 0.0001, 0.00001) #Posar valors de lambda especificats a l'script generador (en el mateix ordre)
 decpoint = ","
-
-# base = "Experiment3_2_2Data/test" #Posar el nom base especificat a l'script
-# kVals = c(150, 175, 200, 225, 250)
-# lambdaVals = c(0.0005, 0.0003, 0.0001, 0.00007, 0.00005)
-# decpoint = "."
-
-# base = "newHeuristic" #Posar el nom base especificat a l'script
-# kVals = c(1, 25, 50, 100, 200)
-# lambdaVals = c(1, 0.01, 0.001, 0.0001, 0.00001)
-# decpoint = "."
-
 
 
 HCData <- read.table(paste(base, "_HC.txt", sep=""), header=TRUE, sep="\t", dec=decpoint)
@@ -63,7 +43,7 @@ for (row in 1:nk) {
   }
 }
 
-
+# Plot de barras tridimensional
 # library("plot3D")
 # k = rep(kVals[1:nk], each=nl)
 # lambda = rep(lambdaVals[1:nl], nk)
@@ -87,3 +67,4 @@ diffMeans <- data.frame(diffMeans)
 rownames(diffMeans) = kVals
 colnames(diffMeans) = lambdaVals
 
+View(means)

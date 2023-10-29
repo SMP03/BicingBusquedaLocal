@@ -1,3 +1,4 @@
+# Script experimento 5
 base = "Experiment5_Data_50reps/test" #Posar el nom base especificat a l'script
 
 HCh1 <- read.table(paste(base, "Experimento5_HC_bikes_profit.txt", sep="_"), header=TRUE, sep="\t")

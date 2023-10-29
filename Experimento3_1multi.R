@@ -1,6 +1,7 @@
+# Script experimento 3 tabla de gráficos beneficio iteración
 base = "testHeur0" #Posar el nom base especificat a l'script
-kVals = c(1, 25, 125)
-lambdaVals = c(0.1, 0.01, 0.001, 0.0001)
+kVals = c(1, 25, 125) #Posar valors de k especificats a l'script generador (en el mateix ordre)
+lambdaVals = c(0.1, 0.01, 0.001, 0.0001) #Posar valors de lambda especificats a l'script generador (en el mateix ordre)
 decpoint = "."
 noms<-c("Iteration", "SAProfits")
 nk = length(kVals)
