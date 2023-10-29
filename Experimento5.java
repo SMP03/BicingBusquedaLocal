@@ -25,13 +25,13 @@ public class Experimento5 {
             String[] main_args_hc_bikes = new String[]{"--rformat", "-he", Integer.toString(0), "-r", Integer.toString(repetitions)};
             mainexec(orgStream, main_args_hc_bikes, filename_base, "HC", "bikes_profit");
 
-            String[] main_args_sa_bikes = new String[]{"--rformat", "-sa", "-he", Integer.toString(0), "-r", Integer.toString(repetitions)};
+            String[] main_args_sa_bikes = new String[]{"--rformat", "-sa", "default", "-he", Integer.toString(0), "-r", Integer.toString(repetitions)};
             mainexec(orgStream, main_args_sa_bikes, filename_base, "SA", "bikes_profit");
 
             String[] main_args_hc_dynamic = new String[]{"--rformat", "-he", Integer.toString(2), "-r", Integer.toString(repetitions)};
             mainexec(orgStream, main_args_hc_dynamic, filename_base, "HC", "dynamic");
 
-            String[] main_args_sa_dynamic = new String[]{"--rformat", "-sa", "-he", Integer.toString(2), "-r", Integer.toString(repetitions)};
+            String[] main_args_sa_dynamic = new String[]{"--rformat", "-sa", "default", "-he", Integer.toString(2), "-r", Integer.toString(repetitions)};
             mainexec(orgStream, main_args_sa_dynamic, filename_base, "SA", "dynamic");
 
         }
