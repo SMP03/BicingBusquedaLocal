@@ -27,3 +27,7 @@ replay_pid*
 .Rhistory
 *.Rproj
 .Rproj.user
+
+
+*.project
+*.classpath

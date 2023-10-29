@@ -34,14 +34,12 @@ public class Experimento7 {
             int demandType = in.nextInt();
             System.out.println("Number of maxFurgos to try: ");
             int nmaxfurgos = in.nextInt();
-            /*System.out.println("Output base name?");
-            String filename_base = in.next();*/
 
             String nameHeuristic = "Heu" + h;
             if (demandType == 0) {
-                output_files.add(new PrintStream(new FileOutputStream("exp7_" + "HC_" + nameHeuristic + "_EQ" + "_.txt", false)));
+                output_files.add(new PrintStream(new FileOutputStream("exp7_" + "SA_" + nameHeuristic + "_EQ" + "_.txt", false)));
             }
-            else output_files.add(new PrintStream(new FileOutputStream("exp7_" + "HC_" + nameHeuristic + "_RH" + "_.txt", false)));
+            else output_files.add(new PrintStream(new FileOutputStream("exp7_" + "SA_" + nameHeuristic + "_RH" + "_.txt", false)));
 
             for (int n_map = 0; n_map<num_map_seeds; ++n_map) {
                 int map_seed = (int)(Math.random()*Integer.MAX_VALUE);
