@@ -103,9 +103,11 @@ public class BicingBoard {
      * @param demand contains the type of demand (equilibrium:0, rushHour:1)
      * @param map_seed contains seed of the map of stations
      * @param init_strategy contains state initialization strategy (randomFurgos:0, maxFurgos:1, emptyFurgos:2, bestk_routes:3,min_distance routes:4)
-     * @return BicingBoard state
+     * @param init_seed contains initialization strategy seed
+     * @param heurist contains the heuristic to be used (first_criterion:0, both_criterion:1, dynamic_criterion:2)
+     * @return BicingBoard state with the specified parameters
      */
-    public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed) {
+    public BicingBoard(int num_furgos, int n_stations, int n_bicycles, int demand, int map_seed, int init_strategy, int init_seed, int heurist) {
         map = new Estaciones(n_stations, n_bicycles, demand, map_seed);
         max_furgos = Math.min(n_stations, num_furgos);
         switch (init_strategy) {
@@ -303,7 +305,7 @@ public class BicingBoard {
     }
 
     /**
-     * Dynamic criterion heuristic, initially assumes transport cost to be free, then incrementally takes it into account
+     * Dynamic criterion heuristic, initially assumes transport cost to be free, then incrementally adds it to the heuristic
      * @return the value for the heuristic
      */
     public double dynamic_criterion_heuristic() {
@@ -314,6 +316,11 @@ public class BicingBoard {
         return ganancias;
     }
 
+
+    /**
+     * Calculates the balance of bikes in each station after the furgo moves (< 0 if more bikes are taken, > 0 if more bikes arrive, for each station)
+     * @return Array of integers of size number of stations, representing the balance of bikes for each station after furgo moves
+     */
     public int[] get_balance() {
         int[] balance = new int[get_num_estacions()]; // Initialized to 0 (guaranteed by lang spec)
         for (int i = 0; i < get_n_furgos(); ++i) {
@@ -336,6 +343,11 @@ public class BicingBoard {
         return balance;
     }
 
+    /**
+     * Given the bike balance for each station, returns its associated benefit obtained from bikes left and picked
+     * @param balance balance of bikes in each station after the furgo moves (< 0 if more bikes are taken, > 0 if more bikes arrive, for each station)
+     * @return the benefit obtained from bikes left and picked
+     */
     public double get_bike_income(int[] balance) {
         double ganancias = 0.0;
         for (int i = 0; i < get_num_estacions(); ++i) {
@@ -356,6 +368,10 @@ public class BicingBoard {
         return ganancias;
     }
 
+    /**
+     * Calculates the cost of transportation of bikes
+     * @return the cost of transportation of bikes
+     */
     public double get_transport_cost(int[] balance) {
         double ganancias = 0.0;
         for (int i = 0; i < get_n_furgos(); ++i) {
@@ -376,6 +392,11 @@ public class BicingBoard {
         return ganancias;
     }
 
+    
+    /**
+     * Calculates the total distance reached considering all furgos
+     * @return the total distance covered 
+     */
     public double get_total_dist() {
         double dist = 0.0;
         for (int i = 0; i < get_n_furgos(); ++i) {
@@ -394,63 +415,124 @@ public class BicingBoard {
         return dist;
     }
 
+    /**
+     * Calculates the manhattan distance between 2 stations
+     * @param e1 station 1
+     * @param e2 station 2
+     * @return the manhattan distance between station e1 and station e2
+     */
     private double manhattan_dist(Estacion e1, Estacion e2) {
         return (Math.abs(e1.getCoordX() - e2.getCoordX()) + Math.abs(e1.getCoordY() - e2.getCoordY()))/1000.0;
     }
 
     /* Goal test */
+
     public boolean is_goal(){
         // compute if board = solution
         return false;
     }
 
     /* Getters */
+
+    /**
+     * Returns the number of furgos used in the state
+     * @return the number of furgos used in the state
+     */
     public int get_n_furgos() {
         return moves.length;
     }
 
+    /**
+     * Returns the matrix of moves describing the state
+     * @return the matrix of moves describing the state
+     */
     public int[][] get_moves() {
         return moves;
     }
 
+     /**
+     * Returns the number of stations
+     * @return the number of stations
+     */
     public int get_num_estacions() {
         return map.size();
     }
 
+     /**
+     * Given a station returns the bikes not used by users in that hour
+     * @param id_estacio station to get the bikes not used
+     * @return the bikes not used by users in that hour for station with id_estacio
+     */
     public int get_bicis_no_usades(int id_estacio) {
         return map.get(id_estacio).getNumBicicletasNoUsadas();
     }
     
+    /**
+     * Given a furgo returns the bikes taken from departure for that furgo
+     * @param furgo_id the furgo from which to return the bikes taken from departure
+     * @return the bikes taken from departure for that furgo
+     */
     public int get_bikes_taken(int furgo_id) {
         return moves[furgo_id][BIKES_TAKEN];
     }
 
+    /**
+     * Given a furgo returns the bikes left in first dropoff station for that furgo
+     * @param furgo_id the furgo from which to return the bikes left in first dropoff station
+     * @return the bikes left in first dropoff station for furgo with furgo_id
+     */
     public int get_bikes_first_dropoff(int furgo_id) {
         if (moves[furgo_id][SECOND_DROPOFF] == -1) return moves[furgo_id][BIKES_TAKEN];
         return moves[furgo_id][BIKES_DROPPED];
     }
 
+    /**
+     * Given a furgo returns the bikes left in second dropoff station for that furgo
+     * @param furgo_id the furgo from which to return the bikes left in second dropoff station
+     * @return the bikes left in second dropoff station for furgo with furgo_id
+     */
     public int get_bikes_second_dropoff(int furgo_id) {
         return moves[furgo_id][BIKES_TAKEN] - moves[furgo_id][BIKES_DROPPED];
     }
 
+    /**
+     * Given a furgo returns the departure station for that furgo
+     * @param furgo_id the furgo from which to return the departure station
+     * @return the departure station for that furgo
+     */
     public int get_departure(int furgo_id) {
         return moves[furgo_id][DEPARTURE];
     }
 
+    /**
+     * Given a furgo returns the first dropoff station for that furgo
+     * @param furgo_id the furgo from which to return the first dropoff station
+     * @return the first dropoff station for that furgo
+     */
     public int get_first_dropoff(int furgo_id) {
         return moves[furgo_id][FIRST_DROPOFF];
     }
 
+    /**
+     * Given a furgo returns the second dropoff station for that furgo
+     * @param furgo_id the furgo from which to return the second dropoff station
+     * @return the second dropoff station for that furgo
+     */
     public int get_second_dropoff(int furgo_id) {
         return moves[furgo_id][SECOND_DROPOFF];
     }
  
-
+    /**
+     * Gives the max number of furgos available for placement
+     * @return the max number of furgos available for placement
+     */
     public static int get_max_furgos() {
         return max_furgos;
     }
 
+    /**
+     * Prints the state configuration
+     */
     public void print_state() {
         for (int i = 0; i < moves.length; i++) {
             int departure = get_departure(i);
@@ -478,7 +560,12 @@ public class BicingBoard {
 
     /* Auxiliary */
 
-    //Checks if there is no furgo starting at departure
+
+    /**
+     * Checks if there is no furgo starting at departure
+     * @param departure station id to check for furgos starting at this station id
+     * @return true if there is no furgo starting at departure departure, false otherwise
+     */
     public boolean is_free_departure(int departure) {
         for(int i = 0; i < moves.length; ++i) 
             if(moves[i][DEPARTURE] == departure) return false;
@@ -491,7 +578,7 @@ public class BicingBoard {
      * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
      * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
      * first_dropoff as the nearest station
-     * @param seed
+     * @param seed seed for minimum distance initialization strategy
      */
     private void minimum_distance_init(int seed) {
         int n_stations = map.size();
@@ -523,7 +610,8 @@ public class BicingBoard {
     }
 
     /**
-     * @param e
+     * Calculates nearest station from the one specified
+     * @param e station to find nearest station from
      * @return The id of the station with minimum manhattan distance to e
      */
     private int nearest_station(Estacion e) {
@@ -548,7 +636,6 @@ public class BicingBoard {
      * Initiates the routes of the F furgos choosing randomingly F stations as the furgos departure station,
      * assigning bikes_taken as the maximum amount avoiding demand penalizations and assigning the 
      * first_dropoff as the nearest station
-     * @param
      */
     private void best_k_routes_init() {
 
@@ -569,6 +656,11 @@ public class BicingBoard {
         }
     }
 
+    /**
+     * Leaves the initial best k routes for the BicingBoard configuration in a priority queue (give most benefit)
+     * @param k integer that represents the size of the priority queue (best k routes)
+     * @return A priority queue with the best k routes (elements with (costRoute,station1,stationNearestFrom1,bikesTaken))
+     */
     private PriorityQueue<Double[]> best_k_routes(int k) {
         PriorityQueue<Double[]> pq = new PriorityQueue<Double[]>(new DoubleArrayComparator());
         
@@ -607,8 +699,8 @@ public class BicingBoard {
     }
 
     /**
-     * 
-     * @param departure
+     * Calculates cost of one dropoff for departure station departure, dropoff statoin destiny and bikes taken from departures bikes_taken
+     * @param departure 
      * @param destiny
      * @param bikes_taken
      * @return cost from departure to destiny taking bikes_taken bikes
@@ -634,6 +726,11 @@ public class BicingBoard {
         return gain_dropoff - loss_departure - transport_cost;
     }
 
+    /**
+     * @param e station to find nearest station from
+     * @param next_e
+     * @return The id of the station with minimum manhattan distance to e
+     */
     private int get_optimum_bikes(Estacion e, Estacion next_e) {
         int diff_demanda = next_e.getNumBicicletasNext() - next_e.getDemanda();
         if (diff_demanda > 0) {
