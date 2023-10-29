@@ -1,4 +1,4 @@
-# Script experiment 1
+# Script experimento 1
 base = "Experiment1Data/10map50rep" #Posar el nom base especificat a l'script
 
 set1 <- read.table(paste(base, "set1.txt", sep="_"), header=TRUE, sep="\t")
