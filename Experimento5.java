@@ -10,9 +10,6 @@ import IA.BicingBusquedaLocal.BicingBoard;
 public class Experimento5 {
 
     public static void main(String[] args) {
-        int minstations;
-        int maxstations;
-        int step;
 
         PrintStream orgStream = null;
 
@@ -20,21 +17,22 @@ public class Experimento5 {
         try {
             orgStream = System.out;
 
-            System.out.println("HC o SA?");
-            String algorithm = in.next();
-            System.out.println("Quina heuristica estas utilitzant? Bike_profits o Dinamica");
-            String heuristica = in.next();
+            System.out.println("Number of repetitions?");
+            int repetitions = in.nextInt();
             System.out.println("Output base name?");
             String filename_base = in.next();
 
-            if (algorithm == "SA" || algorithm ==" sa"){
-                String[] main_args = new String[]{"--rformat", "-sa","default", "-r", Integer.toString(100)};
-                mainexec(orgStream,main_args,filename_base,algorithm,heuristica);
-            }
-            else {
-                String[] main_args = new String[]{"--rformat", "-r", Integer.toString(100)};
-                mainexec(orgStream,main_args,filename_base,algorithm,heuristica);
-            }
+            String[] main_args_hc_bikes = new String[]{"--rformat", "-he", Integer.toString(0), "-r", Integer.toString(repetitions)};
+            mainexec(orgStream, main_args_hc_bikes, filename_base, "HC", "bikes_profit");
+
+            String[] main_args_sa_bikes = new String[]{"--rformat", "-sa", "-he", Integer.toString(0), "-r", Integer.toString(repetitions)};
+            mainexec(orgStream, main_args_sa_bikes, filename_base, "SA", "bikes_profit");
+
+            String[] main_args_hc_dynamic = new String[]{"--rformat", "-he", Integer.toString(2), "-r", Integer.toString(repetitions)};
+            mainexec(orgStream, main_args_hc_dynamic, filename_base, "HC", "dynamic");
+
+            String[] main_args_sa_dynamic = new String[]{"--rformat", "-sa", "-he", Integer.toString(2), "-r", Integer.toString(repetitions)};
+            mainexec(orgStream, main_args_sa_dynamic, filename_base, "SA", "dynamic");
 
         }
         finally {
