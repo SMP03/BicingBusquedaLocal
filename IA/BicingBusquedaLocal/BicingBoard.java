@@ -127,7 +127,7 @@ public class BicingBoard {
                 best_k_routes_init();
                 break;
             case MIN_DIST:
-                moves = new int[max_furgos][5]; 
+                moves = new int[max_furgos][5];
                 minimum_distance_init(init_seed);
                 break;
             default:
@@ -581,19 +581,30 @@ public class BicingBoard {
      * @param seed seed for minimum distance initialization strategy
      */
     private void minimum_distance_init(int seed) {
+
+        for (int i = 0; i < max_furgos; ++i){
+                    moves[i][DEPARTURE] = -1;
+                    moves[i][FIRST_DROPOFF] = -1;
+                    moves[i][SECOND_DROPOFF] = -1;
+                    moves[i][BIKES_TAKEN] = -1;
+                    moves[i][BIKES_DROPPED] = -1;
+        }
+
         int n_stations = map.size();
         int n_furgos = moves.length;
+        
         Random generator = new Random(seed);
         for(int furgo_id = 0; furgo_id < Math.min(n_furgos, n_stations); ++furgo_id) {
             
             int station_id;
             do {
                 station_id = generator.nextInt(n_stations);
+                
             }
             while(!is_free_departure(station_id));
 
-            moves[furgo_id][DEPARTURE] = station_id;
 
+            moves[furgo_id][DEPARTURE] = station_id;
             int id_first_dropoff = nearest_station(map.get(station_id));
             moves[furgo_id][FIRST_DROPOFF] = id_first_dropoff;
 
@@ -744,10 +755,25 @@ public class BicingBoard {
 
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
     private void random_init(int seed) {
+
+        for (int i = 0; i < max_furgos; ++i){
+            moves[i][DEPARTURE] = -1;
+            moves[i][FIRST_DROPOFF] = -1;
+            moves[i][SECOND_DROPOFF] = -1;
+            moves[i][BIKES_TAKEN] = -1;
+            moves[i][BIKES_DROPPED] = -1;
+        }
+
         Random generator = new Random(seed);
         int n_stations = map.size();
         for (int i = 0; i < moves.length; ++i) {
-            moves[i][DEPARTURE] = generator.nextInt(n_stations);
+
+            int station_id;
+            do {
+                station_id = generator.nextInt(n_stations);
+                
+            }
+            while(!is_free_departure(station_id));
 
             do {
                 moves[i][FIRST_DROPOFF] = generator.nextInt(n_stations);
