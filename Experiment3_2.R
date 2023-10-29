@@ -64,9 +64,24 @@ for (row in 1:nk) {
 }
 
 
+# library("plot3D")
+# k = rep(kVals[1:nk], each=nl)
+# lambda = rep(lambdaVals[1:nl], nk)
+# totalProfitMean = rep(0, nk*nl)
+# meansExpanded = data.frame(k, lambda, totalProfitMean)
+# for (row in 1:nrow(meansExpanded)) {
+#   meansExpanded$totalProfitMean[row] = mean(expData$TotalProfit[expData$k==meansExpanded$k[row] & expData$lambda==meansExpanded$lambda[row]])
+# }
+# hist3D(z=means, x=kVals, y=lambdaVals)
+# 
+# hist3D(z=means, scale = FALSE, expand = 0.01, bty = "g", phi = 20,
+#        col = "#0072B2", border = "black", shade = 0.2, ltheta = 90,
+#        space = 0.3, ticktype = "detailed", d = 2)
+
 means <- data.frame(means)
 rownames(means) = kVals
 colnames(means) = lambdaVals
+
 
 diffMeans <- data.frame(diffMeans)
 rownames(diffMeans) = kVals
