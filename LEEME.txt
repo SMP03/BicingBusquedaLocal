@@ -75,4 +75,4 @@ Para obtener los boxplots y t-tests usados en el apartado 6.5 ejecutar `$ java E
 Para obtener el boxplot y t-test usado en el apartado 6.6 ejecutar `$ java Experimento6`, cambiar en `Experimento6.R` el valor de la variable `base` al apropiado y ejecutar el script de *R*.
 
 ### Experimento 7: Estimación del número de furgonetas óptimo
-
+Para obtener los 2 boxplot y los 2 t-test usados en el apartado 6.7 ejecutar `$ java Experimento7`, cambiar en `Experimento7.R` el valor de la variable `base` al apropiado y ejecutar el script de *R*.
