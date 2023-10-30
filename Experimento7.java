@@ -49,8 +49,8 @@ public class Experimento7 {
                     
                     for (int nfurgos = 5; nfurgos <= nmaxfurgos; nfurgos += 5) {
                         System.setOut(output_files.get(0));
-                        String[] main_args_rush = {"--rformat-no-tags","--exp7-no-tags", "-r", Integer.toString(repetitions), "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-rh", "-he", Integer.toString(h), "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lambda), "-num_furgos", Integer.toString(nfurgos)};
-                        String[] main_args_equilibrium = {"--rformat-no-tags","--exp7-no-tags", "-r", Integer.toString(repetitions), "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h), "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lambda), "-num_furgos", Integer.toString(nfurgos)};
+                        String[] main_args_rush = {"--rformat-no-tags","--exp7-no-tags", "-r", Integer.toString(repetitions), "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-rh", "-he", Integer.toString(h), "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lambda), "--num-furgos", Integer.toString(nfurgos)};
+                        String[] main_args_equilibrium = {"--rformat-no-tags","--exp7-no-tags", "-r", Integer.toString(repetitions), "-m", Integer.toString(map_seed), "-i", Integer.toString(init_seed), "-he", Integer.toString(h), "-sa", Integer.toString(steps), Integer.toString(stiter), Integer.toString(k), Double.toString(lambda), "--num-furgos", Integer.toString(nfurgos)};
                         String[] main_args;
 
                         if (demandType == 0) main_args = main_args_equilibrium;

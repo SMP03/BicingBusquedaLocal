@@ -37,29 +37,29 @@ public class Main {
 
     public void Usage() {
         outStream.println("Usage: java Main");
-
+        outStream.println("Description:");
+        outStream.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
+        outStream.println(" -Else program is executed with option values or, if no option provided, default values");
         outStream.println("Options:");
         outStream.println("\t[{-h|--help}]: This manual is printed.");
-
+        outStream.println("# Map configuration options");
         outStream.println("\t[{-m|-mapseed} <map_seed>]: Set map generation seed manually (default:0->is random for each repetition)");
         outStream.println("\t[{-i|-initseed} <init_seed>]: Set initial solution generation strategy seed manually (default:0->is random for each repetition)");
         outStream.println("\t[{-r|-repetitions} <num_of_repetitions>]: Number of executions to be done. 1 by default.");
         outStream.println("\t[--change-stations <num_of_stations>]: Changes the number of stations, bikes=num_stations*50, furgos=num_stations/5");
-
+        outStream.println("\t[--num-furgos <num_furgos>]: Changes the number of furgos (can be overwritten by --change-stations if added after this option)");
+        outStream.println("# Search Algorithm configuration options");
         outStream.println("\t[--operators <AddFurgo> <RemoveFurgo> <ChangeDpt> <ChangeDrop1> <ChangeDrop2> <SwapDrop>]: Select operator set (0:Exclude, 1:Include). All included by default.");
         outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
-        outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
+        outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.(if not specified Hill Climbing is used by default)");
         outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
-        outStream.println("\t[{-he|--heuristic} 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost]");
-
+        outStream.println("\t[{-he|--heuristic} <heuristic_id>] 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost");
+        outStream.println("# Output format configuration options (some combinations affect each other)");
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
         outStream.println("\t[{-s|-solutions}]: Print final solution in readable format (tk=Bikes taken, av=Bikes available, dp=Bikes dropped, dm=Station demand).");
         outStream.println("\t[--rtrace-cost]: Traces the cost of the solution through the execution of the search algorithm. Compatible with r.");
-
-        outStream.println("Description:");
-        outStream.println(" -If options are not provided console input is used (LIMITED FUNCTIONALITY)");
-        outStream.println(" -Else program is executed with option values or, if no option provided, default values");
+        System.exit(0);
     }
 
     public static void main(String[] args) throws Exception {
@@ -96,13 +96,13 @@ public class Main {
         if (args.length >= 1) {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i].equals("-m") || args[i].equals("--mapseed")) {
-                    if (i+1 == args.length) {Usage();return;};
+                    if (i+1 == args.length) Usage();
                     map_seed = Integer.valueOf(args[i+1]);
                     random_map_seed = false;
                     ++i;
                 }
                 else if (args[i].equals("-i") || args[i].equals("--initseed")) {
-                    if (i+1 == args.length) {Usage();return;};
+                    if (i+1 == args.length) Usage();
                     init_seed = Integer.valueOf(args[i+1]);
                     random_init_seed = false;
                     ++i;
@@ -114,7 +114,7 @@ public class Main {
                     ++i;
                 }
                 else if (args[i].equals("-r") || args[i].equals("--repetitions")) {
-                    if (i+1 == args.length) {Usage();return;};
+                    if (i+1 == args.length) Usage();
                     num_of_reps = Integer.valueOf(args[i+1]);
                     ++i;
                 }
@@ -153,7 +153,6 @@ public class Main {
                 }
                 else if (args[i].equals("-h") || args[i].equals("--help")) {
                     Usage();
-                    return;
                 }
                 else if (args[i].equals("-sa") || args[i].equals("--simulated-annealing")) {
                     simulated_annealing = true;
@@ -179,9 +178,8 @@ public class Main {
                 }
                 else if (args[i].equals("--rtrace-cost")) {
                     Usage();
-                    return;
                 }
-                else if (args[i].equals("-num_furgos")) {
+                else if (args[i].equals("--num-furgos")) {
                     if (i+1 == args.length) Usage();
                     num_furgos = Integer.valueOf(args[i+1]);
                     i+=1;
@@ -199,7 +197,6 @@ public class Main {
                 else {
                     outStream.printf("Argument \"%s\" is not valid.%n", args[i]);
                     Usage();
-                    return;
                 }
             }
         }
