@@ -50,7 +50,7 @@ public class Main {
         outStream.println("\t[--init-strat <init_strat_id>]: Set init strategy (0:Random number of furgos, 1:Max num of furgos, 2:No furgos, 3:Best k routes, 4:Minimum distance). 4 by default.");
         outStream.println("\t[{-sa|--simulated-annealing} {default | <steps> <stiter> <k> <lamb>}]: Use Simulated Annealing as search algorithm.");
         outStream.println("\t[{-rh|--rush-hour}]: changes from equilibrium to rush hour");
-        outStream.println("\t[{-he|--heuristic} <heuristic_num>] Set heuristic (0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost)");
+        outStream.println("\t[{-he|--heuristic} 0: Only bikes profit, 1: bikes profit + transport cost, 2: bikes profit + dynamic transport cost]");
 
         outStream.println("\t[{-q|-quiet}]: Reduce amount of output information (Useful for quick execution).");
         outStream.println("\t[{--rformat|--rformat-no-tags}]: Print final data in format compatible with r import from text (no-tags removes column names).");
@@ -81,6 +81,8 @@ public class Main {
         Boolean rformat = false;
         Boolean rtrace = false;
         Boolean rtags = false;
+        Boolean rtagsExp7 = false;
+        Boolean exp7 = false;
         Boolean operators[] = {true, true, true, true, true, true};
         int init_strategy = BicingBoard.MIN_DIST;
         Boolean simulated_annealing = false;
@@ -88,6 +90,7 @@ public class Main {
         int stiter = 1;
         int k = 25;
         double lamb = 0.0001;
+
         int heuristic_criterion = 0;
 
         if (args.length >= 1) {
@@ -169,14 +172,29 @@ public class Main {
                     scenery_type = Estaciones.RUSH_HOUR;
                 }
                 else if (args[i].equals("-he") || args[i].equals("--heuristic")) {
-                    if(i+1 == args.length) {Usage();return;};
+                    if(i+1 == args.length) Usage();
                     heuristic_criterion = Integer.valueOf(args[i+1]);
                     i += 1;
-                    if(heuristic_criterion < 0 || heuristic_criterion > 2) {Usage();return;};
+                    if(heuristic_criterion < 0 || heuristic_criterion > 2) Usage();
                 }
                 else if (args[i].equals("--rtrace-cost")) {
                     Usage();
                     return;
+                }
+                else if (args[i].equals("-num_furgos")) {
+                    if (i+1 == args.length) Usage();
+                    num_furgos = Integer.valueOf(args[i+1]);
+                    i+=1;
+                }
+                else if (args[i].equals("--exp7-no-tags")) {
+                    if (i+1 == args.length) Usage();
+                    exp7 = true;
+                    rtagsExp7 = false;
+                }
+                else if (args[i].equals("-exp7")) {
+                    if (i+1 == args.length) Usage();
+                    exp7 = true;
+                    rtagsExp7 = true;
                 }
                 else {
                     outStream.printf("Argument \"%s\" is not valid.%n", args[i]);
@@ -223,8 +241,12 @@ public class Main {
         ArrayList<Double> total_distances = new ArrayList<Double>();
         ArrayList<Double> times = new ArrayList<Double>();
 
+        
         if (rtags) {
             outStream.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tExecutionTime\tNodesExpanded");
+        }
+        else if (rtagsExp7) {
+            outStream.println("NumRep\tMapSeed\tInitStratSeed\tBikeProfit\tTransportCosts\tTotalProfit\tFinalHeuristic\tTotalDistance\tNumFurgos\tExecutionTime\tNodesExpanded");
         }
         for (int i = 0; i < num_of_reps; ++i) {
             if (random_map_seed) map_seed = (int)(Math.random()*Integer.MAX_VALUE);
@@ -288,6 +310,9 @@ public class Main {
                     outStream.printf("Final metrics:Bike profits:%15.2f | Transport costs:%15.2f | Total:%15.2f | AlgHeuristic:%15.2f | Total Distance:%15.2f | Nodes Expanded:%10d | Execution Time:%15.2f%n",
                     bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, num_of_nodes, time);
                     outStream.println("===============================================================================================");
+                }
+                else if (exp7) {
+                    outStream.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%d\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, num_furgos, time, num_of_nodes);
                 }
                 else {
                     outStream.printf("%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%d%n", i, map_seed, init_seed, bike_income, transport_cost, (bike_income+transport_cost), heuristic_val, total_distance, time, num_of_nodes);

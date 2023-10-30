@@ -14,7 +14,3 @@ colnames(expData) = noms
 
 ymin = min(HCprofits[which.min(HCprofits$V1),], SAprofits[which.min(SAprofits$V1),])
 ymax = max(HCprofits[which.max(HCprofits$V1),], SAprofits[which.max(SAprofits$V1),])
-
-plot(expData$Iteration, expData$SAProfits, type="l", ylim=c(ymin, ymax))
-abline(h=HCMaxProfit, col="red")
-title(main = "k=100 lambda=0.0001") 
