@@ -50,6 +50,8 @@ public class Experimento2 {
                     }
                     catch (Exception e) {
                         orgStream.println("Exception in Main");
+                        orgStream.println(e.toString());
+                        e.printStackTrace();
                     }
                 }
             }

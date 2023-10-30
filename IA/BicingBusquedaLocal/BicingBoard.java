@@ -756,12 +756,8 @@ public class BicingBoard {
     /* Randomize routes (each path visits 3 DIFFERENT stations) */
     private void random_init(int seed) {
 
-        for (int i = 0; i < max_furgos; ++i){
+        for (int i = 0; i < this.get_n_furgos(); ++i){
             moves[i][DEPARTURE] = -1;
-            moves[i][FIRST_DROPOFF] = -1;
-            moves[i][SECOND_DROPOFF] = -1;
-            moves[i][BIKES_TAKEN] = -1;
-            moves[i][BIKES_DROPPED] = -1;
         }
 
         Random generator = new Random(seed);
@@ -771,9 +767,9 @@ public class BicingBoard {
             int station_id;
             do {
                 station_id = generator.nextInt(n_stations);
-                
             }
             while(!is_free_departure(station_id));
+            moves[i][DEPARTURE] = station_id;
 
             do {
                 moves[i][FIRST_DROPOFF] = generator.nextInt(n_stations);
