@@ -1,5 +1,5 @@
 # Script experimento 4
-base = "test" #Posar el nom base especificat a l'script
+base = "Experiment4Data/test" #Posar el nom base especificat a l'script
 # Omplir amb els paràmetres de l'execució
 min = 25
 max = 250
