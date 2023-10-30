@@ -64,7 +64,7 @@ Cada columna de las tablas obtenidas representa un valor de *k* y cada fila un v
 ### Experimento 4: Estudio de la evolución del tiempo de ejecución en función del tamaño del problema
 Ejecutar `$ java Experimento4`.
 
-Para obtener un gráfico sencillo del tiempo de ejecución en función del número de estaciones cambiar en `Experimento4.R` el valor de la variable `base` al apropiado y ejecutar el script de *R*.
+Para obtener un gráfico sencillo del tiempo de ejecución en función del número de estaciones cambiar en `Experimento4.R` el valor de la variable `base` al apropiado, rellenar los valores `min`, `max`, `step` y `reps` con los parámetros de la ejecución y ejecutar el script de *R*.
 
 Para obtener el gráfico con la línea de tendencia se ha usado una hoja de cálculo de google spreadsheets y la función integrada para encontrar líneas de tendencia.
 
